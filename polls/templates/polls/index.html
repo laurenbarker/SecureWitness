@@ -1,0 +1,10 @@
+{% if latest_question_list %}
+    <ul>
+    {% for report in latest_question_list %}
+        <li>{{ report.shortdesc }}</li>
+
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No reports are available.</p>
+{% endif %}
