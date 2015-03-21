@@ -29,7 +29,11 @@ def search(request):
             # ...
             # redirect to a new URL:
             keyword = form.cleaned_data['your_name']
-            list = report.objects.filter(shortdesc__contains=keyword)
+            keyword = keyword.split()
+            list = []
+            for word in keyword:
+                list.extend(report.objects.filter(shortdesc__contains=word))
+            list = set(list)
             template = loader.get_template('polls/index.html')
             context = RequestContext(request, {
                   'latest_question_list': list,
