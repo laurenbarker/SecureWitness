@@ -3,8 +3,10 @@ from django.template import RequestContext, loader
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
-from polls.models import report,user
+from SecureWitness.models import report,user
 import time
+
+#put forms in forms.py later
 from django import forms
 
 class NameForm(forms.Form):
@@ -13,21 +15,22 @@ class NameForm(forms.Form):
 class UploadFileForm(forms.Form):
     shortdesc = forms.CharField(max_length=50)
     longdesc = forms.CharField(max_length=300)
-    location = forms.CharField(max_length=50)
-    incident_date = forms.DateField()
-    keywords = forms.CharField(max_length=50)
-    private = forms.BooleanField()
-    file = forms.FileField()
+    location = forms.CharField(max_length=50, required=False)
+    incident_date = forms.DateField(required=False)
+    keywords = forms.CharField(max_length=50, required=False)
+    private = forms.BooleanField(required=False)
+    file = forms.FileField(required=False)
 
 
 def index(request):
-    latest_question_list = report.objects.order_by('timestamp')
-    template = loader.get_template('polls/index.html')
+    report_list = report.objects.order_by('timestamp')
+    template = loader.get_template('SecureWitness/index.html')
     context = RequestContext(request, {
-        'latest_question_list': latest_question_list,
+        'report_list': report_list,
     })
     return HttpResponse(template.render(context))
 
+#search
 def search(request):
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
@@ -44,7 +47,7 @@ def search(request):
             for word in keyword:
                 list.extend(report.objects.filter(shortdesc__contains=word))
             list = set(list)
-            template = loader.get_template('polls/index.html')
+            template = loader.get_template('SecureWitness/index.html')
             context = RequestContext(request, {
                   'latest_question_list': list,
             })
@@ -52,23 +55,41 @@ def search(request):
     # if a GET (or any other method) we'll create a blank form
     else:
         form = NameForm()
-    return render(request, 'polls/search.html', {'form': form})
+    return render(request, 'SecureWitness/search.html', {'form': form})
 
+#upload reports
 def upload(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             short = form.cleaned_data['shortdesc']
             long = form.cleaned_data['longdesc']
-            loc = form.cleaned_data['location']
-            inc = form.cleaned_data['incident_date']
-            key = form.cleaned_data['keywords']
-            priv = form.cleaned_data['private']
-            f = request.FILES['file']
-            #u = user(username = 'test', password = '1234')
-            rep = report( shortdesc = short, longdesc = long, location = loc, incident_date = inc, keywords = key, private = priv, file = f)
+            if form.cleaned_data['location'] is None:
+                loc = None
+            else:
+                loc = form.cleaned_data['location']
+            if form.cleaned_data['incident_date'] is None:
+                inc = None
+            else:
+                inc = form.cleaned_data['incident_date']
+            if form.cleaned_data['keywords'] is None:
+                key = None
+            else:
+                key = form.cleaned_data['keywords']
+            if form.cleaned_data['private'] is None:
+                priv = False
+            else:
+                priv = form.cleaned_data['private']
+            if request.FILES.get('file') is None:
+                f = None
+            else:
+                f = request.FILES['file']
+            #Once login is finished, get current logged in user
+            name = "test"
+            u = user.objects.filter(username=name)[0]
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = inc, keywords = key, private = priv, file = f)
             rep.save()
             return HttpResponse("added successfully")
     else:
         form = UploadFileForm()
-    return render(request,'polls/upload.html', {'form': form})
+    return render(request,'SecureWitness/upload.html', {'form': form})

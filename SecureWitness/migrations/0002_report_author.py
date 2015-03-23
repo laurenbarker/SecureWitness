@@ -7,14 +7,14 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('polls', '0002_auto_20150320_2300'),
+        ('SecureWitness', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='report',
-            name='file',
-            field=models.FileField(blank=True, null=True, upload_to='C:/Users/The F/PycharmProjects/forms/uploaded files'),
+            name='author',
+            field=models.ForeignKey(default=1, to='SecureWitness.user'),
             preserve_default=True,
         ),
     ]

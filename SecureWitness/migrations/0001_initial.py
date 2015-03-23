@@ -13,14 +13,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='report',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)),
                 ('timestamp', models.DateTimeField(auto_now_add=True)),
                 ('shortdesc', models.CharField(max_length=50)),
                 ('longdesc', models.CharField(max_length=300)),
                 ('location', models.CharField(max_length=50)),
                 ('incident_date', models.DateField()),
                 ('keywords', models.CharField(max_length=50)),
-                ('private', models.BooleanField()),
+                ('private', models.BooleanField(default=False)),
+                ('file', models.FileField(blank=True, null=True, upload_to='C:/Users/The F/PycharmProjects/forms/uploaded files')),
             ],
             options={
             },
@@ -29,18 +30,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='user',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)),
                 ('username', models.CharField(max_length=50)),
                 ('password', models.CharField(max_length=100)),
             ],
             options={
             },
             bases=(models.Model,),
-        ),
-        migrations.AddField(
-            model_name='report',
-            name='author',
-            field=models.ForeignKey(to='polls.user'),
-            preserve_default=True,
         ),
     ]
