@@ -1,9 +1,10 @@
 from django.http import HttpResponse
-from django.template import RequestContext, loader
+# from django.template import RequestContext, loader
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from SecureWitness.models import report,user
+from SecureWitness.forms import GiveAdminAccessForm
 import time
 
 #put forms in forms.py later
@@ -20,7 +21,6 @@ class UploadFileForm(forms.Form):
     keywords = forms.CharField(max_length=50, required=False)
     private = forms.BooleanField(required=False)
     file = forms.FileField(required=False)
-
 
 def index(request):
     report_list = report.objects.order_by('timestamp')
@@ -93,3 +93,14 @@ def upload(request):
     else:
         form = UploadFileForm()
     return render(request,'SecureWitness/upload.html', {'form': form})
+
+def adminPage(request):
+    users = user.objects.filter().order_by('username').values()
+    user_list = []
+
+    for aUser in users:
+        user_list.append((aUser['username'], aUser['username']))
+
+    form = GiveAdminAccessForm()
+
+    return render(request, 'SecureWitness/adminPage.html', {'form' : form, 'user_list' : user_list})
