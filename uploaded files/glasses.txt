@@ -1,0 +1,7 @@
+glasses measurements
+
+total width : 145 mm
+bridge: 19mm
+bridge: 140
+lens height : 33
+lens width : 55

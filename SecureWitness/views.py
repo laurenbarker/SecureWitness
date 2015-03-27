@@ -4,6 +4,8 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from SecureWitness.models import report,user
+from django.contrib.admin.widgets import AdminDateWidget
+from django.contrib.admin import widgets
 import time
 
 #put forms in forms.py later
@@ -11,6 +13,7 @@ from django import forms
 class loginForm(forms.Form):
     username =  forms.CharField(max_length=50)
     password =  forms.CharField(max_length=50)
+    Register = forms.BooleanField(required=False)
 
 class NameForm(forms.Form):
     your_name = forms.CharField(label='Search Criteria', max_length=100)
@@ -19,11 +22,11 @@ class UploadFileForm(forms.Form):
     shortdesc = forms.CharField(max_length=50)
     longdesc = forms.CharField(max_length=300)
     location = forms.CharField(max_length=50, required=False)
-    incident_date = forms.DateField(required=False)
+    incident_date = forms.DateField(required=False,widget = widgets.AdminDateWidget())
     keywords = forms.CharField(max_length=50, required=False)
     private = forms.BooleanField(required=False)
     file = forms.FileField(required=False)
-#work on login page
+
 def login(request):
         # if this is a POST request we need to process the form data
     if request.method == 'POST':
@@ -32,16 +35,24 @@ def login(request):
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
-            # ...
             # redirect to a new URL:
-            user = form.cleaned_data['username']
+            u = form.cleaned_data['username']
             pw = form.cleaned_data['password']
-
-           # return HttpResponse(template.render(context))
+            if(form.cleaned_data['Register']):
+                if(len(user.objects.filter(username=u)) > 0):
+                    return HttpResponse('username already taken')
+                else:
+                    newuser = user(username=u, password=pw)
+                    newuser.save()
+                    return HttpResponse("new user created successfully")
+            elif(len(user.objects.filter(username=u).filter(password=pw)) > 0):
+                return HttpResponse("successful login")
+            else:
+                return HttpResponse("unsuccessful login")
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = NameForm()
-    return render(request, 'SecureWitness/search.html', {'form': form})
+        form = loginForm()
+    return render(request, 'SecureWitness/login.html', {'form': form})
 
 
 def index(request):
