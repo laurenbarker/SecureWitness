@@ -4,12 +4,9 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from SecureWitness.models import report,user
-<<<<<<< HEAD
 from django.contrib.admin.widgets import AdminDateWidget
 from django.contrib.admin import widgets
-=======
 from SecureWitness.forms import GiveAdminAccessForm
->>>>>>> AdminAccess
 import time
 
 #put forms in forms.py later
@@ -31,7 +28,6 @@ class UploadFileForm(forms.Form):
     private = forms.BooleanField(required=False)
     file = forms.FileField(required=False)
 
-<<<<<<< HEAD
 def login(request):
         # if this is a POST request we need to process the form data
     if request.method == 'POST':
@@ -59,9 +55,6 @@ def login(request):
         form = loginForm()
     return render(request, 'SecureWitness/login.html', {'form': form})
 
-
-=======
->>>>>>> AdminAccess
 def index(request):
     report_list = report.objects.order_by('timestamp')
     template = loader.get_template('SecureWitness/index.html')
