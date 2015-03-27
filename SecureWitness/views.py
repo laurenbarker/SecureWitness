@@ -1,11 +1,15 @@
 from django.http import HttpResponse
-from django.template import RequestContext, loader
+# from django.template import RequestContext, loader
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from SecureWitness.models import report,user
+<<<<<<< HEAD
 from django.contrib.admin.widgets import AdminDateWidget
 from django.contrib.admin import widgets
+=======
+from SecureWitness.forms import GiveAdminAccessForm
+>>>>>>> AdminAccess
 import time
 
 #put forms in forms.py later
@@ -27,6 +31,7 @@ class UploadFileForm(forms.Form):
     private = forms.BooleanField(required=False)
     file = forms.FileField(required=False)
 
+<<<<<<< HEAD
 def login(request):
         # if this is a POST request we need to process the form data
     if request.method == 'POST':
@@ -55,6 +60,8 @@ def login(request):
     return render(request, 'SecureWitness/login.html', {'form': form})
 
 
+=======
+>>>>>>> AdminAccess
 def index(request):
     report_list = report.objects.order_by('timestamp')
     template = loader.get_template('SecureWitness/index.html')
@@ -116,3 +123,23 @@ def upload(request):
     else:
         form = UploadFileForm()
     return render(request,'SecureWitness/upload.html', {'form': form})
+
+def adminPage(request):
+    if request.method == 'POST':
+        form = GiveAdminAccessForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['username']
+
+            try: 
+                users = user.objects.get(username=name)
+                users.adminStatus = 1
+                users.save()
+                return HttpResponse("User was given admin acces")
+            except:
+                return HttpResponse("User does not exist")
+    else:
+        form = GiveAdminAccessForm()
+        return render(request, 'SecureWitness/adminPage.html', { 'form' : form })
+
+
+
