@@ -95,12 +95,21 @@ def upload(request):
     return render(request,'SecureWitness/upload.html', {'form': form})
 
 def adminPage(request):
-    users = user.objects.filter().order_by('username').values()
-    user_list = []
+    if request.method == 'POST':
+        form = GiveAdminAccessForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['username']
 
-    for aUser in users:
-        user_list.append((aUser['username'], aUser['username']))
+            try: 
+                users = user.objects.get(username=name)
+                users.adminStatus = 1
+                users.save()
+                return HttpResponse("User was given admin acces")
+            except:
+                return HttpResponse("User does not exist")
+    else:
+        form = GiveAdminAccessForm()
+        return render(request, 'SecureWitness/adminPage.html', { 'form' : form })
 
-    form = GiveAdminAccessForm()
 
-    return render(request, 'SecureWitness/adminPage.html', {'form' : form, 'user_list' : user_list})
+

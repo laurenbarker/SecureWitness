@@ -1,7 +1,6 @@
-<form action = '/SecureWitness/giveAccess/' method = 'POST' enctype=multipart/form-data>
-    <select title = 'GiveAdminAccessForm'>
-		{{ form }}
-	</select>
+<form action = '/SecureWitness/adminPage/' method = 'POST' enctype=multipart/form-data>
+	{% csrf_token %}
+	{{ form }}
 	<br> <br> 
 	<input type = 'submit' value='Give Access'>
 </form>
