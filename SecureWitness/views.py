@@ -8,6 +8,9 @@ import time
 
 #put forms in forms.py later
 from django import forms
+class loginForm(forms.Form):
+    username =  forms.CharField(max_length=50)
+    password =  forms.CharField(max_length=50)
 
 class NameForm(forms.Form):
     your_name = forms.CharField(label='Search Criteria', max_length=100)
@@ -20,6 +23,25 @@ class UploadFileForm(forms.Form):
     keywords = forms.CharField(max_length=50, required=False)
     private = forms.BooleanField(required=False)
     file = forms.FileField(required=False)
+#work on login page
+def login(request):
+        # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = loginForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            user = form.cleaned_data['username']
+            pw = form.cleaned_data['password']
+
+           # return HttpResponse(template.render(context))
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = NameForm()
+    return render(request, 'SecureWitness/search.html', {'form': form})
 
 
 def index(request):
@@ -64,26 +86,16 @@ def upload(request):
         if form.is_valid():
             short = form.cleaned_data['shortdesc']
             long = form.cleaned_data['longdesc']
-            if form.cleaned_data['location'] is None:
-                loc = None
-            else:
-                loc = form.cleaned_data['location']
+            loc = request.POST.get('location')
             if form.cleaned_data['incident_date'] is None:
                 inc = None
             else:
-                inc = form.cleaned_data['incident_date']
-            if form.cleaned_data['keywords'] is None:
-                key = None
-            else:
-                key = form.cleaned_data['keywords']
-            if form.cleaned_data['private'] is None:
+                inc = request.POST.get('incident_date')
+            key = request.POST.get('keywords')
+            priv = request.POST.get('private')
+            if priv is None:
                 priv = False
-            else:
-                priv = form.cleaned_data['private']
-            if request.FILES.get('file') is None:
-                f = None
-            else:
-                f = request.FILES['file']
+            f = request.FILES.get('file')
             #Once login is finished, get current logged in user
             name = "test"
             u = user.objects.filter(username=name)[0]

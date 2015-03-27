@@ -1,7 +1,8 @@
 
 <form action="/SecureWitness/upload/" method="post" enctype=multipart/form-data>
     {% csrf_token %}
-
-    {{ form }}
+ <table style="color:black;text-align:left;">
+        {{ form.as_table }}
+     </table>
 <input type="submit" value="Upload" >
 </form>
