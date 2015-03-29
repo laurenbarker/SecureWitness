@@ -1,6 +1,27 @@
-
-<form action="/SecureWitness/search/" method="post">
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Search Page</title>
+       <!--
+    code for calendar popup taken from https://djangosnippets.org/snippets/2088/
+    -->
+<link rel="stylesheet" type="text/css" href="http://jquery-ui.googlecode.com/svn/tags/latest/themes/base/jquery-ui.css" media="all" />
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $('.vDateField').datepicker();
+    });
+</script>
+</head>
+<body>
+<form action="/SecureWitness/search/" method="post" enctype=multipart/form-data>
     {% csrf_token %}
-    {{ form }}
+    <table style="color:black;text-align:left;">
+        {{ form.as_table }}
+     </table>
 <input type="submit" value="Search" >
 </form>
+</body>
+</html>
