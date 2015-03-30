@@ -1,10 +1,16 @@
 {% if report_list %}
-    <ul>
+    <table border="1">
+        <tr><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td></tr>
     {% for report in report_list %}
-        <li>{{ report.shortdesc }}</li>
-
+        <tr>
+        <td>{{ report.shortdesc }}</td>
+            <td>{{report.longdesc}}</td>
+            <td>{{report.location}}</td>
+            <td>{{report.keywords}}</td>
+            <td>{{report.incident_date}}</td>
+        </tr>
     {% endfor %}
-    </ul>
+    </table>
 {% else %}
     <p>No reports are available.</p>
 {% endif %}
