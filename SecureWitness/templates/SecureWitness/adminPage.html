@@ -3,14 +3,18 @@
 <title>Admin Page</title>
 <body>
 
-	<form action = '/SecureWitness/giveAdminAccess/' method = 'POST' enctype=multipart/form-data>
+	<form action = '/SecureWitness/giveAdminAccess/' method = 'POST'>
 		{% csrf_token %}
 		{{ form }}
 		<br> <br> 
-		<input type = 'submit' value='Give Access'>
+		<input type = 'submit' value='Give User Admin Access'>
 	</form>
 
-	<form action = '/SecureWitness/'
+	<form action = '/SecureWitness/createGroup/' method = 'POST'>
+	{% csrf_token %}
+		<input type = 'submit' value='Create Group'>
+	</form>
+
 </body>
 </html>
 

@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from SecureWitness.models import report,user
 from django.db.models import Q
 from django.contrib.admin import widgets
-from SecureWitness.forms import GiveAdminAccessForm
+from SecureWitness.forms import GiveAdminAccessForm, CreateGroupForm
 
 #put forms in forms.py later
 from django import forms
@@ -183,6 +183,20 @@ def giveAdminAccess(request):
     else:
         form = GiveAdminAccessForm()
         return render(request, 'SecureWitness/adminPage.html', { 'form' : form })
+
+def createGroup(request):
+    if request.method == 'POST':
+        form = CreateGroupForm()
+        return render(request, 'SecureWitness/createGroup.html', {'form' : form} )
+
+def makeGroup(request):
+    if request.method == 'POST':
+        form = CreateGroupForm(request.POST)
+        if form.is_valid():
+            groupName = form.cleaned_data['groupName']
+            username = form.cleaned_data['addUser']
+
+    return HttpResponse("HI")
 
 
 
