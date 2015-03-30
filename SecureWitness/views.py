@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-# from django.template import RequestContext, loader
+from django.template import RequestContext, loader
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -177,7 +177,7 @@ def adminPage(request):
                 users = user.objects.get(username=name)
                 users.adminStatus = 1
                 users.save()
-                return HttpResponse("User was given admin acces")
+                return HttpResponse("User was given admin access")
             except:
                 return HttpResponse("User does not exist")
     else:
