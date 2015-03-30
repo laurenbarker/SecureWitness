@@ -197,7 +197,7 @@ def adminPage(request):
                 users = user.objects.get(username=name)
                 users.adminStatus = 1
                 users.save()
-                return HttpResponse("User was given admin acces")
+                return HttpResponse("User was given admin access")
             except:
                 return HttpResponse("User does not exist")
     else:
