@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-# from django.template import RequestContext, loader
+from django.template import RequestContext, loader
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -16,17 +16,17 @@ class loginForm(forms.Form):
     Register = forms.BooleanField(required=False)
 
 class NameForm(forms.Form):
-    desc = forms.CharField(label='Description Search Criteria', max_length=100)
+    desc = forms.CharField(label='Description Search Criteria', max_length=100, required=False)
     loc_and = forms.BooleanField(required=False, label="AND")
     loc_or = forms.BooleanField(required=False, label = "OR")
-    loc = forms.CharField(label="Location Search", max_length=50)
+    loc = forms.CharField(label="Location Search", max_length=50,required=False)
     key_and = forms.BooleanField(required=False, label="AND")
     key_or = forms.BooleanField(required=False, label = "OR")
-    key = forms.CharField(label="Keyword Search", max_length=50)
+    key = forms.CharField(label="Keyword Search", max_length=50,required=False)
     inc_and = forms.BooleanField(required=False, label="AND")
     inc_or = forms.BooleanField(required=False, label = "OR")
-    inc_start = forms.DateField(label="Incident Start Date", widget=widgets.AdminDateWidget())
-    inc_end = forms.DateField(label="Incident End Date", widget=widgets.AdminDateWidget())
+    inc_start = forms.DateField(label="Incident Start Date", widget=widgets.AdminDateWidget(),required=False)
+    inc_end = forms.DateField(label="Incident End Date", widget=widgets.AdminDateWidget(),required=False)
 
 
 class UploadFileForm(forms.Form):
@@ -47,8 +47,9 @@ def login(request):
         if form.is_valid():
             # process the data in form.cleaned_data as required
             # redirect to a new URL:
-            u = form.cleaned_data['username']
+            u = request.POST.get('username')
             pw = form.cleaned_data['password']
+            users = user.objects.filter(username=u).filter(password=pw)
             if(form.cleaned_data['Register']):
                 if(len(user.objects.filter(username=u)) > 0):
                     return HttpResponse('username already taken')
@@ -56,8 +57,13 @@ def login(request):
                     newuser = user(username=u, password=pw)
                     newuser.save()
                     return HttpResponse("new user created successfully")
-            elif(len(user.objects.filter(username=u).filter(password=pw)) > 0):
-                return HttpResponse("successful login")
+            elif(len(users) > 0):
+                request.session['u'] = u
+                if users[0].adminStatus == 1:
+                    form = GiveAdminAccessForm()
+                    return render(request, 'SecureWitness/adminPage.html', { 'form' : form })
+                else:
+                    return render(request, 'SecureWitness/userhome.html', {'u' : u})
             else:
                 return HttpResponse("unsuccessful login")
     # if a GET (or any other method) we'll create a blank form
@@ -66,15 +72,23 @@ def login(request):
     return render(request, 'SecureWitness/login.html', {'form': form})
 
 def index(request):
-    report_list = report.objects.order_by('timestamp')
-    template = loader.get_template('SecureWitness/index.html')
-    context = RequestContext(request, {
-        'report_list': report_list,
-    })
-    return HttpResponse(template.render(context))
+    if 'u' in request.session:
+        name = request.session['u']
+        u = user.objects.filter(username=name)[0]
+        report_list = report.objects.filter(author=u)
+        template = loader.get_template('SecureWitness/index.html')
+        context = RequestContext(request, {
+            'report_list': report_list,
+            'user' : request.session['u'],
+        })
+        return HttpResponse(template.render(context))
+    else:
+        return HttpResponse("You are not logged in")
 
 #search
 def search(request):
+    #All search criteria is optional. If no search criteria is provided, it produces an empty list.
+    #If no AND or OR option is selected, OR is used by default.
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
@@ -84,36 +98,40 @@ def search(request):
             # process the data in form.cleaned_data as required
             # ...
             # redirect to a new URL:
-            keyword = form.cleaned_data['desc']
-            keyword = keyword.split()
-            desclist = []
             loclist = []
             keylist = []
-            for word in keyword:
-                #list.extend(report.objects.filter(shortdesc__contains=word))
-                #list.extend(report.objects.filter(longdesc__contains=word))
-                qs =  report.objects.filter(Q(shortdesc__icontains=word) | Q(longdesc__icontains=word))
-                desclist.extend(qs)
+            desclist = []
+            inc_list = []
+            keyword = request.POST.get('desc')
+            if keyword is not None:
+                keyword = keyword.split()
+                for word in keyword:
+                    qs =  report.objects.filter(Q(shortdesc__icontains=word) | Q(longdesc__icontains=word))
+                    desclist.extend(qs)
             desclist = set(desclist)
-            loc = form.cleaned_data['loc']
-            loc = loc.split()
-            for word in loc:
-                qs = report.objects.filter(Q(location__icontains=word))
-                loclist.extend(qs)
+            loc = request.POST.get('loc')
+            if loc is not None:
+                loc = loc.split()
+                for word in loc:
+                    qs = report.objects.filter(Q(location__icontains=word))
+                    loclist.extend(qs)
             loclist = set(loclist)
-            key = form.cleaned_data['key']
-            key = key.split()
-            for word in key:
-                qs = report.objects.filter(Q(keywords__icontains=word))
-                keylist.extend(qs)
-            keylist = set(keylist)
+
+            key = request.POST.get('key')
+            if key is not None:
+                key = key.split()
+                for word in key:
+                    qs = report.objects.filter(Q(keywords__icontains=word))
+                    keylist.extend(qs)
+                keylist = set(keylist)
             inc_start = request.POST.get('inc_start')
-            inc_start = inc_start.split("/")
-            inc_start = inc_start[2] + "-" + inc_start[0] + "-" + inc_start[1]
             inc_end = request.POST.get('inc_end')
-            inc_end = inc_end.split("/")
-            inc_end = inc_end[2] + "-" + inc_end[0] + "-" + inc_end[1]
-            inc_list = report.objects.filter(incident_date__range=(inc_start,inc_end))
+            if inc_start and inc_end:
+                inc_start = inc_start.split("/")
+                inc_start = inc_start[2] + "-" + inc_start[0] + "-" + inc_start[1]
+                inc_end = inc_end.split("/")
+                inc_end = inc_end[2] + "-" + inc_end[0] + "-" + inc_end[1]
+                inc_list = report.objects.filter(incident_date__range=(inc_start,inc_end))
 
             if(form.cleaned_data['loc_and']):
                 desclist = list(set(desclist) & set(loclist))
@@ -133,10 +151,11 @@ def search(request):
             })
             return HttpResponse(template.render(context))
     # if a GET (or any other method) we'll create a blank form
-    else:
+    elif 'u' in request.session:
         form = NameForm()
-    return render(request, 'SecureWitness/search.html', {'form': form})
-
+        return render(request, 'SecureWitness/search.html', {'form': form})
+    else:
+        return HttpResponse('You are not logged in')
 #upload reports
 def upload(request):
     if request.method == 'POST':
@@ -158,15 +177,16 @@ def upload(request):
                 priv = False
             f = request.FILES.get('file')
             #Once login is finished, get current logged in user
-            name = "test"
+            name = request.session['user']
             u = user.objects.filter(username=name)[0]
             rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f)
             rep.save()
             return HttpResponse("added successfully")
-    else:
+    elif 'u' in request.session:
         form = UploadFileForm()
-    return render(request,'SecureWitness/upload.html', {'form': form})
-
+        return render(request,'SecureWitness/upload.html', {'form': form})
+    else:
+        return HttpResponse('You are not logged in')
 def adminPage(request):
     if request.method == 'POST':
         form = GiveAdminAccessForm(request.POST)
@@ -184,5 +204,7 @@ def adminPage(request):
         form = GiveAdminAccessForm()
         return render(request, 'SecureWitness/adminPage.html', { 'form' : form })
 
+def homepage(request):
+        return render(request, 'SecureWitness/homepage.html')
 
 
