@@ -117,7 +117,7 @@ def upload(request):
         form = UploadFileForm()
     return render(request,'SecureWitness/upload.html', {'form': form})
 
-def adminPage(request):
+def giveAdminAccess(request):
     if request.method == 'POST':
         form = GiveAdminAccessForm(request.POST)
         if form.is_valid():
@@ -133,6 +133,8 @@ def adminPage(request):
     else:
         form = GiveAdminAccessForm()
         return render(request, 'SecureWitness/adminPage.html', { 'form' : form })
+
+
 
 
 

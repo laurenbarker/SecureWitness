@@ -1,6 +1,16 @@
-<form action = '/SecureWitness/adminPage/' method = 'POST' enctype=multipart/form-data>
-	{% csrf_token %}
-	{{ form }}
-	<br> <br> 
-	<input type = 'submit' value='Give Access'>
-</form>
+<DOCTYPE !html>
+<html>
+<title>Admin Page</title>
+<body>
+
+	<form action = '/SecureWitness/giveAdminAccess/' method = 'POST' enctype=multipart/form-data>
+		{% csrf_token %}
+		{{ form }}
+		<br> <br> 
+		<input type = 'submit' value='Give Access'>
+	</form>
+
+	<form action = '/SecureWitness/'
+</body>
+</html>
+
