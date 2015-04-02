@@ -22,10 +22,11 @@ class report(models.Model):
         return self.shortdesc
 
 class group(models.Model):
-    group = models.CharField(max_length=1000)
+    users = models.CharField(max_length=500, blank=True)
+    groupName = models.CharField(max_length=100, blank=True)
 
     def setGroup(self, x):
-        self.group = json.dumps(x)
+        self.users = json.dumps(x)
 
     def getGroup(self, x):
-        return json.loads(self.group)
+        return json.loads(self.users)
