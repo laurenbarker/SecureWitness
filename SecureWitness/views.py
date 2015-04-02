@@ -194,6 +194,7 @@ def makeGroup(request):
         form = CreateGroupForm(request.POST)
         if form.is_valid():
             groupName = form.cleaned_data['groupName']
-            username = form.cleaned_data['addUser']
+
+    
 
         

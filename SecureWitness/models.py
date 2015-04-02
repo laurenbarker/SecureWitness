@@ -20,3 +20,12 @@ class report(models.Model):
     file = models.FileField(upload_to='C:/Users/The F/PycharmProjects/forms/uploaded files', null = True, blank = True)
     def __str__(self):
         return self.shortdesc
+
+class group(models.Model):
+    group = models.CharField(max_length=1000)
+
+    def setGroup(self, x):
+        self.group = json.dumps(x)
+
+    def getGroup(self, x):
+        return json.loads(self.group)
