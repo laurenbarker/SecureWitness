@@ -196,9 +196,4 @@ def makeGroup(request):
             groupName = form.cleaned_data['groupName']
             username = form.cleaned_data['addUser']
 
-    return HttpResponse("HI")
-
-
-
-
-
+        
