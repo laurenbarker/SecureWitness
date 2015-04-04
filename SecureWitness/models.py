@@ -1,9 +1,11 @@
 from django.db import models
+import json
 
 class user(models.Model):
     username = models.CharField(max_length=50)
     password = models.CharField(max_length=100)
     adminStatus = models.IntegerField(default=0)
+    suspensionStatus = models.IntegerField(default=0)
     def __str__(self):
         return self.username
 
@@ -25,8 +27,5 @@ class group(models.Model):
     users = models.CharField(max_length=500, blank=True)
     groupName = models.CharField(max_length=100, blank=True)
 
-    def setGroup(self, x):
-        self.users = json.dumps(x)
-
-    def getGroup(self, x):
-        return json.loads(self.users)
+    def __str__(self):
+        return self.groupName
