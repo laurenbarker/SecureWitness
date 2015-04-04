@@ -156,6 +156,7 @@ def search(request):
         return render(request, 'SecureWitness/search.html', {'form': form})
     else:
         return HttpResponse('You are not logged in')
+
 #upload reports
 def upload(request):
     if request.method == 'POST':
@@ -187,6 +188,7 @@ def upload(request):
         return render(request,'SecureWitness/upload.html', {'form': form})
     else:
         return HttpResponse('You are not logged in')
+
 def adminPage(request):
     if request.method == 'POST':
         form = GiveAdminAccessForm(request.POST)
