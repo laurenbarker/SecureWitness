@@ -209,8 +209,11 @@ def adminPage(request):
         return render(request, 'SecureWitness/adminPage.html', { 'form' : form })
 
 def homepage(request):
+    if 'u' in request.session:
+        u = request.user.username
+        return render(request, 'SecureWitness/userhome.html', {'u' : u})
+    else:
         return render(request, 'SecureWitness/homepage.html')
-
 
 
 

@@ -5,10 +5,14 @@
     <title>User Login</title>
 </head>
 <body>
+<h1>SecureWitness</h1>
+<h3>Login or Register</h3>
 <form action="/SecureWitness/login/" method="post">
     {% csrf_token %}
-    {{ form }}
-<input type="submit" value="Login" >
+ <table style="color:black;text-align:left;">
+        {{ form.as_table }}
+     </table>
+    <input type="submit" value="Login" >
 </form>
 
 </body>
