@@ -5,8 +5,12 @@
 
 	<form action = '/SecureWitness/giveUserAccess/' method = 'POST'>
 		{% csrf_token %}
-		<br>
 		<input type = 'submit' value='Give User Admin Access'>
+	</form>
+
+	<form action = '/SecureWitness/suspendUser/' method = 'POST'>
+		{% csrf_token %}
+		<input type = 'submit' value = 'Suspend A User'>
 	</form>
 
 	<form action = '/SecureWitness/createGroup/' method = 'POST'>

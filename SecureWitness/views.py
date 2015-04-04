@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from SecureWitness.models import report,user, group
 from django.db.models import Q
 from django.contrib.admin import widgets
-from SecureWitness.forms import GiveAdminAccessForm, CreateGroupForm, addUserForm
+from SecureWitness.forms import GiveAdminAccessForm, CreateGroupForm, addUserForm, suspendUserForm
 import json
 
 #put forms in forms.py later
@@ -274,5 +274,27 @@ def addUserToGroup(request):
     else:
         form = addUserForm()
         return render(request, 'SecureWitness/addUser.html', {'form' : form })
-            
+
+def suspendUser(request):
+    if request.method == 'POST':
+        form = suspendUserForm()
+        return render(request, 'SecureWitness/suspendUser.html', { 'form' : form })
+
+def suspendAUser(request):
+    if request.method == 'POST':
+        form = suspendUserForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username'].strip()
+            try: 
+                users = user.objects.get(username=username)
+                users.suspensionStatus = 1
+                users.save()
+                return HttpResponse("User was suspended")
+            except:
+                return HttpResponse("User does not exist")
+        else:
+            return HttpResponse("Please enter a username")
+    else:
+        form = suspendUserForm()
+        return render(request, 'SecureWitness/suspendUser.html', { 'form' : form })
         

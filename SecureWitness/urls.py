@@ -15,4 +15,6 @@ urlpatterns = patterns('',
     url(r'^makeGroup/$', views.makeGroup, name='makeGroup'),
     url(r'^addUser/$', views.addUser, name = 'addUser'),
    	url(r'^addUserToGroup/$', views.addUserToGroup, name = 'addUserToGroup'),
+    url(r'^suspendUser/$', views.suspendUser, name = 'suspendUser'),
+    url(r'^suspendAUser/$', views.suspendAUser, name = 'suspendAUser'),
 )
