@@ -183,6 +183,8 @@ def upload(request):
             rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f)
             rep.save()
             return HttpResponse("added successfully")
+        else:
+            return render(request,'SecureWitness/upload.html', {'form': form})
     elif 'u' in request.session:
         form = UploadFileForm()
         return render(request,'SecureWitness/upload.html', {'form': form})
