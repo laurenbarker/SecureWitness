@@ -22,5 +22,5 @@ urlpatterns = patterns('',
     url(r'^addUser/$', views.addUser, name = 'addUser'),
    	url(r'^addUserToGroup/$', views.addUserToGroup, name = 'addUserToGroup'),
     url(r'^suspendUser/$', views.suspendUser, name = 'suspendUser'),
-    url(r'^suspendAUser/$', views.suspendAUser, name = 'suspendAUser'),
+    url(r'^changeUserSuspensionStatus/$', views.changeUserSuspensionStatus, name = 'changeUserSuspensionStatus'),
 )

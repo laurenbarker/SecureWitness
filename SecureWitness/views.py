@@ -345,18 +345,23 @@ def addUserToGroup(request):
 def suspendUser(request):
     if request.method == 'POST':
         form = suspendUserForm()
-        return render(request, 'SecureWitness/suspendUser.html', { 'form' : form })
+        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', { 'form' : form })
 
-def suspendAUser(request):
+def changeUserSuspensionStatus(request):
     if request.method == 'POST':
         form = suspendUserForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username'].strip()
             try: 
                 users = user.objects.get(username=username)
-                users.suspensionStatus = 1
-                users.save()
-                return HttpResponse("User was suspended")
+                if 'suspend' in request.POST:
+                    users.suspensionStatus = 1
+                    users.save()
+                    return HttpResponse("User was suspended")
+                else:
+                    users.suspensionStatus = 0
+                    users.save()
+                    return HttpResponse("User was unsuspended")
             except:
                 return HttpResponse("User does not exist")
         else:
@@ -364,4 +369,3 @@ def suspendAUser(request):
     else:
         form = suspendUserForm()
         return render(request, 'SecureWitness/suspendUser.html', { 'form' : form })
-

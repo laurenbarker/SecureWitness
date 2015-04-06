@@ -1,0 +1,12 @@
+<form action = '/SecureWitness/changeUserSuspensionStatus/' method = 'POST'>
+	{% csrf_token %}
+	{{ form }}
+	<br><br>
+	<input type = 'submit' value='Suspend User' name = 'suspend'>
+	<input type = 'submit' value='Unsuspend User' name = 'unsuspend'>
+</form>
+
+<form action = '/SecureWitness/adminPage/' method = 'POST'>
+	{% csrf_token %}
+	<input type = 'submit' value = 'Return To Admin Page'>
+</form>
