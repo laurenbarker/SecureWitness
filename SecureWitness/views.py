@@ -64,6 +64,8 @@ def login(request):
                 if users[0].adminStatus == 1:
                     form = GiveAdminAccessForm()
                     return render(request, 'SecureWitness/adminPage.html', { 'form' : form })
+                elif users[0].suspensionStatus == 1:
+                    return HttpResponse('Your account has been suspended by an administrator')
                 else:
                     return render(request, 'SecureWitness/userhome.html', {'u' : u})
             else:
