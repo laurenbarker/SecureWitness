@@ -189,7 +189,6 @@ def upload(request):
             if priv is None:
                 priv = False
             f = request.FILES.get('file')
-            #Once login is finished, get current logged i   n user
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
             rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f, folder = None)
