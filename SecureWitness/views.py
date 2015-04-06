@@ -9,6 +9,10 @@ from django.contrib.admin import widgets
 import os
 from SecureWitness.forms import GiveAdminAccessForm, CreateGroupForm, addUserForm, suspendUserForm
 import json
+from Crypto.Hash import SHA256
+from Crypto.PublicKey import RSA
+from Crypto import Random
+from django.conf import settings
 
 #put forms in forms.py later
 from django import forms
@@ -193,9 +197,33 @@ def upload(request):
             if priv is None:
                 priv = False
             f = request.FILES.get('file')
+
+            # public/private key pair
+            random_generator = Random.new().read
+            key = RSA.generate(1024, random_generator)
+
+            # encrypt
+            public_key = key.publickey()
+            # change
+
+            newName = f.name + "_enc"
+
+            path2 = os.path.join(settings.MEDIA_ROOT, 'uploaded_files', newName)
+            myf = open(path2, "w+b")
+
+            #wipe the existing content
+            #f.truncate()
+
+            for chunk in f.chunks():
+                enc_data = public_key.encrypt(chunk, 32)
+                myf.write(str(enc_data))
+
+            f.name = path2
+
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
             rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f, folder = None)
+            rep.f = myf
             rep.save()
             return HttpResponse("added successfully")
         else:
