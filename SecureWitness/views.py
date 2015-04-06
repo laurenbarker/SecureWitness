@@ -64,6 +64,8 @@ def login(request):
                 if users[0].adminStatus == 1:
                     form = GiveAdminAccessForm()
                     return render(request, 'SecureWitness/adminPage.html', { 'form' : form })
+                elif users[0].suspensionStatus == 1:
+                    return HttpResponse('Your account has been suspended by an administrator')
                 else:
                     return render(request, 'SecureWitness/userhome.html', {'u' : u})
             else:
@@ -402,18 +404,23 @@ def addUserToGroup(request):
 def suspendUser(request):
     if request.method == 'POST':
         form = suspendUserForm()
-        return render(request, 'SecureWitness/suspendUser.html', { 'form' : form })
+        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', { 'form' : form })
 
-def suspendAUser(request):
+def changeUserSuspensionStatus(request):
     if request.method == 'POST':
         form = suspendUserForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username'].strip()
             try: 
                 users = user.objects.get(username=username)
-                users.suspensionStatus = 1
-                users.save()
-                return HttpResponse("User was suspended")
+                if 'suspend' in request.POST:
+                    users.suspensionStatus = 1
+                    users.save()
+                    return HttpResponse("User was suspended")
+                else:
+                    users.suspensionStatus = 0
+                    users.save()
+                    return HttpResponse("User was unsuspended")
             except:
                 return HttpResponse("User does not exist")
         else:
@@ -421,4 +428,3 @@ def suspendAUser(request):
     else:
         form = suspendUserForm()
         return render(request, 'SecureWitness/suspendUser.html', { 'form' : form })
-
