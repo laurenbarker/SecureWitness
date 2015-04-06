@@ -7,6 +7,7 @@ from SecureWitness.models import report,user
 from django.db.models import Q
 from django.contrib.admin import widgets
 from SecureWitness.forms import GiveAdminAccessForm
+import os
 
 #put forms in forms.py later
 from django import forms
@@ -75,13 +76,25 @@ def index(request):
     if 'u' in request.session:
         name = request.session['u']
         u = user.objects.filter(username=name)[0]
-        report_list = report.objects.filter(author=u)
+        report_list = report.objects.filter(author=u, folder = None)
+        folder_list = report.objects.exclude(folder=None).filter(author=u)
+        folders = {}
+        for item in folder_list:
+            if item.folder not in folders:
+                folders[item.folder] = 1
+            else:
+                folders[item.folder] += 1
         template = loader.get_template('SecureWitness/index.html')
         context = RequestContext(request, {
             'report_list': report_list,
             'user' : request.session['u'],
+            'folder_list' : folders
         })
-        return HttpResponse(template.render(context))
+        return render(request, 'SecureWitness/index.html', {
+            'report_list': report_list,
+            'user' : request.session['u'],
+            'folder_list' : folders
+        })
     else:
         return HttpResponse("You are not logged in")
 
@@ -165,7 +178,7 @@ def upload(request):
             long = form.cleaned_data['longdesc']
             loc = request.POST.get('location')
             if form.cleaned_data['incident_date'] is None:
-                inc = None
+                date = None
             else:
                 #convert date format to YYYY-MM-DD from MM/DD/YYYY
                 inc = request.POST.get('incident_date')
@@ -176,23 +189,25 @@ def upload(request):
             if priv is None:
                 priv = False
             f = request.FILES.get('file')
-            #Once login is finished, get current logged in user
-            name = request.session['user']
+            #Once login is finished, get current logged i   n user
+            name = request.session['u']
             u = user.objects.filter(username=name)[0]
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f)
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f, folder = None)
             rep.save()
             return HttpResponse("added successfully")
+        else:
+            return HttpResponse("form was not filled out correctly")
     elif 'u' in request.session:
         form = UploadFileForm()
         return render(request,'SecureWitness/upload.html', {'form': form})
     else:
         return HttpResponse('You are not logged in')
+
 def adminPage(request):
     if request.method == 'POST':
         form = GiveAdminAccessForm(request.POST)
         if form.is_valid():
             name = form.cleaned_data['username']
-
             try: 
                 users = user.objects.get(username=name)
                 users.adminStatus = 1
@@ -207,4 +222,55 @@ def adminPage(request):
 def homepage(request):
         return render(request, 'SecureWitness/homepage.html')
 
+def viewFolder(request, folder=""):
+    name = request.session['u']
+    u = user.objects.filter(username=name)[0]
+    report_list = report.objects.filter(folder = folder).filter(author=u)
+    template = loader.get_template('SecureWitness/viewFolder.html')
+    context = RequestContext(request, {
+            'report_list': report_list,
+            'user' : request.session['u'],
+            'folder_name' : folder
+    })
+    return HttpResponse(template.render(context))
 
+def deleteFolder(request, folder=""):
+    report_list = report.objects.filter(folder = folder).delete()
+    if 'u' in request.session:
+        name = request.session['u']
+        u = user.objects.filter(username=name)[0]
+        report_list = report.objects.filter(author=u, folder = None)
+        folder_list = report.objects.exclude(folder=None).filter(author=u)
+        folders = {}
+        for item in folder_list:
+            if item.folder not in folders:
+                folders[item.folder] = 1
+            else:
+                folders[item.folder] += 1
+        template = loader.get_template('SecureWitness/index.html')
+        context = RequestContext(request, {
+            'report_list': report_list,
+            'user' : request.session['u'],
+            'folder_list' : folders
+        })
+        return HttpResponse(template.render(context))
+    else:
+        return HttpResponse("You are not logged in")
+
+def renameFolder(request, folder=""):
+    if 'u' in request.session:
+        new = request.POST['new']
+        report_list = report.objects.filter(folder=folder)
+        for x in report_list:
+            x.folder = new
+            x.save()
+        name = request.session['u']
+        template = loader.get_template('SecureWitness/viewFolder.html')
+        context = RequestContext(request, {
+                'report_list': report_list,
+                'user' : request.session['u'],
+                'folder_name' : new
+        })
+        return HttpResponse(template.render(context))
+    else:
+        return HttpResponse("You are not logged in")
