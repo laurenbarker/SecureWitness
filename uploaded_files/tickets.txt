@@ -1,0 +1,7 @@
+2013-05-15 08:25:33#John Doe#thef374982+user1@gmail.com#computer#open#description1#admin1#user1
+2013-09-12 18:25:33#guy#thef374982+user2@gmail.com#laptop computer#open#description2#admin2#user2
+2014-02-02 12:35:33#guy#thef374982+user3@gmail.com#desk robot#open#description3#admin3#user1
+2014-07-22 15:11:22#person#thef374982+user4@gmail.com#robot#open#description4#admin4#user2
+2015-01-15 03:45:53#person#thef374982+user5@gmail.com#issue#closed#description5#admin5#user1
+2015-02-12 14:05:55#anonymous#thef374982+user6@gmail.com#issue#closed#description6##user1
+2015-03-01 02:25:33#anonymous#thef374982+user7@gmail.com#issue#closed#description7##user2

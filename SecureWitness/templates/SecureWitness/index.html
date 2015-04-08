@@ -10,14 +10,17 @@
     <a href="/SecureWitness/homepage"><img style="position: fixed; top: 5px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
 </div>
 
-<h2>Index</h2>
-
+<h2>List of Reports</h2>
+{% if not search %}
 <b>List of reports submitted by {{ user }}</b>
+{% else %}
+<b> Search Results</b>
+{% endif %}
 {% if report_list %}
-    <br/>
+<br/>
     Reports not contained in a folder
     <table border="1">
-        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>File</td></tr>
+        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>File</td><td>Modify</td></tr>
     {% for report in report_list %}
         <tr>
             {% if not report.folder %}
@@ -29,11 +32,15 @@
             <td>{{report.incident_date}}</td>
             {% if report.file %}
             <td><a href = '{{report.file.url}}'>File </a></td>
+            {% else %}
+            <td>No File</td>
             {% endif %}
+            <td><a href="/SecureWitness/viewReport/{{report.shortdesc}}">Modify</a></td>
             {% endif %}
         </tr>
     {% endfor %}
     </table>
+{% endif %}
 {% if folder_list %}
 <br/>List of Folders containing Reports
 <table border = "1">
@@ -51,7 +58,7 @@
     {% endfor %}
 </table>
 {% endif %}
-{% else %}
+{% if not report_list and not folder_list %}
     <p>No reports are available.</p>
 {% endif %}
 <a href="/SecureWitness/search/">Search</a>

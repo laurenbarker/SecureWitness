@@ -10,7 +10,7 @@
     <br/>
     Contents of Folder: {{folder_name}}
     <table border="1">
-        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>File</td><td>View Report</td></tr>
+        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>File</td><td>Modify Report</td></tr>
     {% for report in report_list %}
         <tr>
             <td>{{report.author}}</td>
@@ -24,7 +24,7 @@
             {% else %}
             <td>No File</td>
             {% endif %}
-            <td><a href="/SecureWitness/viewReport/{{report.shortdesc}}">View</a></td>
+            <td><a href="/SecureWitness/viewReport/{{report.shortdesc}}">Modify</a></td>
         </tr>
     {% endfor %}
     </table>

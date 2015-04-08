@@ -79,8 +79,8 @@ def index(request):
     if 'u' in request.session:
         name = request.session['u']
         u = user.objects.filter(username=name)[0]
-        report_list = report.objects.filter(author=u, folder = None)
-        folder_list = report.objects.exclude(folder=None).filter(author=u)
+        report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
+        folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
         folders = {}
         for item in folder_list:
             if item.folder not in folders:
@@ -161,9 +161,22 @@ def search(request):
                 desclist = list(set(desclist) & set(inc_list))
             else:
                 desclist = list(set(desclist) | set(inc_list))
+
+            report_list = []
+            folders = {}
+            for item in desclist:
+                if not item.folder:
+                    report_list.append(item)
+                else:
+                    if item.folder not in folders:
+                        folders[item.folder] = 1
+                    else:
+                        folders[item.folder] += 1
             template = loader.get_template('SecureWitness/index.html')
             context = RequestContext(request, {
-                  'report_list': desclist,
+                  'report_list': report_list,
+                  'folder_list': folders,
+                  'search' : 'yes'
             })
             return HttpResponse(template.render(context))
     # if a GET (or any other method) we'll create a blank form
@@ -264,44 +277,52 @@ def viewFolder(request, folder=""):
 def viewReport(request, desc=""):
     if 'u' in request.session:
         if request.method == 'POST':
-            form = UploadFileForm(request.POST, request.FILES)
-            short = request.POST.get('shortdesc')
-            long = request.POST.get('longdesc')
-            loc = request.POST.get('location')
-            inc = request.POST.get('incident_date')
-            if inc is None or inc == "":
-                date = None
+            if request.POST.get('del'):
+                report_list = report.objects.filter(shortdesc=desc).delete()
+                template = loader.get_template('SecureWitness/viewReport.html')
+                context = RequestContext(request, {
+                   'user' : request.session['u'],
+                })
+                return HttpResponse(template.render(context))
             else:
-                #convert date format to YYYY-MM-DD from MM/DD/YYYY
-                date = inc.split("/")
-                date = date[2] + "-" + date[0] + "-" + date[1]
-            key = request.POST.get('keywords')
-            priv = request.POST.get('private')
-            if priv is None:
-                priv = False
-            f = request.FILES.get('file')
-            name = request.session['u']
-            u = user.objects.filter(username=name)[0]
-            report_list = report.objects.filter(shortdesc=desc).filter(author=u)[0]
-            if short:
-                report_list.shortdesc = short
-            if long:
-                report_list.longdesc = long
-            if loc:
-                report_list.location = loc
-            report_list.incident_date = date
-            if key:
-                report_list.keywords = key
-            report_list.private = priv
-            if f:
-                report_list.file = f
-            report_list.save()
-            form = UploadFileForm()
-            #return HttpResponse(template.render(context))
-            if short:
-                return HttpResponseRedirect( short)
-            else:
-                return HttpResponseRedirect( report_list.shortdesc)
+                form = UploadFileForm(request.POST, request.FILES)
+                short = request.POST.get('shortdesc')
+                long = request.POST.get('longdesc')
+                loc = request.POST.get('location')
+                inc = request.POST.get('incident_date')
+                if inc is None or inc == "":
+                    date = None
+                else:
+                    #convert date format to YYYY-MM-DD from MM/DD/YYYY
+                    date = inc.split("/")
+                    date = date[2] + "-" + date[0] + "-" + date[1]
+                key = request.POST.get('keywords')
+                priv = request.POST.get('private')
+                if priv is None:
+                    priv = False
+                f = request.FILES.get('file')
+                name = request.session['u']
+                u = user.objects.filter(username=name)[0]
+                report_list = report.objects.filter(shortdesc=desc).filter(author=u)[0]
+                if short:
+                    report_list.shortdesc = short
+                if long:
+                    report_list.longdesc = long
+                if loc:
+                    report_list.location = loc
+                report_list.incident_date = date
+                if key:
+                    report_list.keywords = key
+                report_list.private = priv
+                if f:
+                    report_list.file = f
+                report_list.save()
+                form = UploadFileForm()
+                #return HttpResponse(template.render(context))
+                if short:
+                    return HttpResponseRedirect( short)
+                else:
+                    return HttpResponseRedirect( report_list.shortdesc)
         else:
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
@@ -318,8 +339,8 @@ def viewReport(request, desc=""):
          return HttpResponse("You are not logged in")
 
 def deleteFolder(request, folder=""):
-    report_list = report.objects.filter(folder = folder).delete()
     if 'u' in request.session:
+        report_list = report.objects.filter(folder = folder).delete()
         name = request.session['u']
         u = user.objects.filter(username=name)[0]
         report_list = report.objects.filter(author=u, folder = None)

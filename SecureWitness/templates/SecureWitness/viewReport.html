@@ -17,10 +17,11 @@
 </script>
 </head>
 <body>
+{% if report %}
 <b>Viewing Report: {{report.shortdesc}}</b>
     <br/>
     <table border="1">
-        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>Private</td><td>File</td></tr>
+        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>Private</td><td>File</td><td>Delete</td></tr>
         <tr>
             <td>{{report.author}}</td>
             <td>{{report.shortdesc }}</td>
@@ -36,7 +37,7 @@
             {% endif %}
         </tr>
         <tr>
-            <form method="POST"enctype=multipart/form-data>
+            <form method="POST"enctype=multipart/form-data action="/SecureWitness/viewReport/{{report.shortdesc}}">
             {% csrf_token %}
                 <td><input type="submit" value="Change Report Data" ></td>
            <td> {{ form.shortdesc }}</td>
@@ -46,10 +47,14 @@
             <td>{{form.incident_date}}</td>
             <td>{{form.private}}</td>
             <td>{{form.file}}</td>
+            <td><input type="submit" value = "Delete" name="del"></td>
             </form>
         </tr>
 
     </table>
+{% else %}
+The report has been deleted. Select an option to return to another page.<br/>
+{% endif %}
 <a href="/SecureWitness/search/">Search</a>
 <a href="/SecureWitness/upload/">Upload</a>
 <a href="/SecureWitness/index">Index</a>
