@@ -254,39 +254,6 @@ def homepage(request):
     else:
         return render(request, 'SecureWitness/homepage.html')
 
-def adminPage(request):
-    return render(request, 'SecureWitness/adminPage.html')
-
-def giveUserAccess(request):
-    if request.method == 'POST':
-        form = GiveAdminAccessForm()
-        return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form })
-
-def giveAdminAccess(request):
-    if request.method == 'POST':
-        form = GiveAdminAccessForm(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data['username'].strip()
-
-            try: 
-                users = user.objects.get(username=name)
-                users.adminStatus = 1
-                users.save()
-                return HttpResponse("User was given admin access")
-            except:
-                return HttpResponse("User does not exist")
-
-        else:
-            return HttpResponse("Please enter a user")
-    else:
-        form = GiveAdminAccessForm()
-        return render(request, 'SecureWitness/adminPage.html', { 'form' : form })
-
-def createGroup(request):
-    if request.method == 'POST':
-        form = CreateGroupForm()
-        return render(request, 'SecureWitness/createGroup.html', { 'form' : form } )
-
 def viewFolder(request, folder=""):
     if 'u' in request.session:
         name = request.session['u']
@@ -407,6 +374,29 @@ def renameFolder(request, folder=""):
     else:
         return HttpResponse("You are not logged in")
 
+def adminPage(request):
+    return render(request, 'SecureWitness/adminPage.html')
+
+def giveAdminAccess(request):
+    if request.method == 'POST':
+        form = GiveAdminAccessForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['username'].strip()
+
+            try: 
+                users = user.objects.get(username=name)
+                users.adminStatus = 1
+                users.save()
+                return HttpResponse("User was given admin access")
+            except:
+                return HttpResponse("User does not exist")
+
+        else:
+            return HttpResponse("Please enter a user")
+    else:
+        form = GiveAdminAccessForm()
+        return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form })
+
 def makeGroup(request):
     if request.method == 'POST':
         form = CreateGroupForm(request.POST)
@@ -420,11 +410,10 @@ def makeGroup(request):
                 myGroup = group(groupName = name, users = json.dumps(users))
                 myGroup.save()
                 return HttpResponse("Group was successfully created!")
+    else:
+        form = CreateGroupForm()
+        return render(request, 'SecureWitness/createGroup.html', { 'form' : form } )
 
-def addUser(request):
-    if request.method == 'POST':
-        form = addUserForm()
-        return render(request, 'SecureWitness/addUser.html', { 'form' : form })
 
 def addUserToGroup(request):
     if request.method == 'POST':
@@ -450,11 +439,6 @@ def addUserToGroup(request):
         form = addUserForm()
         return render(request, 'SecureWitness/addUser.html', {'form' : form })
 
-def suspendUser(request):
-    if request.method == 'POST':
-        form = suspendUserForm()
-        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', { 'form' : form })
-
 def changeUserSuspensionStatus(request):
     if request.method == 'POST':
         form = suspendUserForm(request.POST)
@@ -476,4 +460,4 @@ def changeUserSuspensionStatus(request):
             return HttpResponse("Please enter a username")
     else:
         form = suspendUserForm()
-        return render(request, 'SecureWitness/suspendUser.html', { 'form' : form })
+        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', { 'form' : form })
