@@ -20,4 +20,5 @@ urlpatterns = patterns('',
     url(r'^makeGroup/$', views.makeGroup, name='makeGroup'),
    	url(r'^addUserToGroup/$', views.addUserToGroup, name = 'addUserToGroup'),
     url(r'^changeUserSuspensionStatus/$', views.changeUserSuspensionStatus, name = 'changeUserSuspensionStatus'),
+    url(r'^deleteReport/$', views.deleteReport, name = 'deleteReport'),
 )

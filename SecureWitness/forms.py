@@ -17,3 +17,6 @@ class addUserForm(forms.Form):
 
 class suspendUserForm(forms.Form):
     username = forms.CharField(label='Username', max_length = 100)
+
+class deleteReportForm(forms.Form):
+	shortdesc = forms.CharField(label='Shortdesc', max_length = 100)

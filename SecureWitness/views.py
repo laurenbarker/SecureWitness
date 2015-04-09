@@ -7,7 +7,7 @@ from SecureWitness.models import report,user, group
 from django.db.models import Q
 from django.contrib.admin import widgets
 import os
-from SecureWitness.forms import GiveAdminAccessForm, CreateGroupForm, addUserForm, suspendUserForm
+from SecureWitness.forms import GiveAdminAccessForm, CreateGroupForm, addUserForm, suspendUserForm, deleteReportForm
 import json
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
@@ -461,3 +461,19 @@ def changeUserSuspensionStatus(request):
     else:
         form = suspendUserForm()
         return render(request, 'SecureWitness/changeUserSuspensionStatus.html', { 'form' : form })
+
+def deleteReport(request):
+    if request.method == 'POST':
+        form = deleteReportForm(request.POST)
+        if form.is_valid():
+            shortdesc = form.cleaned_data['shortdesc'].strip()
+            try:
+                someReport = report.objects.get(shortdesc=shortdesc).delete()
+                return HttpResponse("Report has been deleted!")
+            except:
+                return HttpResponse("Report with given shortdesc does not exist!")
+        else:
+            return HttpResponse("Please enter a shortdesc")
+    else:
+        form = deleteReportForm()
+        return render(request, 'SecureWitness/deleteReport.html', { 'form' : form })
