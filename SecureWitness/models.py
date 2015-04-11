@@ -19,6 +19,7 @@ class report(models.Model):
     keywords = models.CharField(max_length=50, blank = True, null=True)
     private = models.BooleanField(default=False)
     folder = models.CharField(max_length=50, blank = True, null = True)
+    group = models.CharField(max_length=500, blank = True)
 #change this line to save files somewhere else
     file = models.FileField( upload_to='uploaded_files',null = True, blank = True)
     def __str__(self):

@@ -43,6 +43,11 @@ class UploadFileForm(forms.Form):
     keywords = forms.CharField(max_length=50, required=False)
     private = forms.BooleanField(required=False)
     file = forms.FileField(required=False)
+    def __init__(self,group_list = [], Post = "", files=""):
+        super(UploadFileForm, self).__init__()
+        for group in group_list:
+            self.fields["Give access to " + group] = forms.BooleanField(required=False)
+
 
 def login(request):
         # if this is a POST request we need to process the form data
@@ -193,12 +198,12 @@ def search(request):
 #upload reports
 def upload(request):
     if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            short = form.cleaned_data['shortdesc']
-            long = form.cleaned_data['longdesc']
+        form = UploadFileForm([],request.POST, request.FILES)
+        if request.POST.get('shortdesc') and request.POST.get('longdesc'):
+            short = request.POST.get('shortdesc')
+            long = request.POST.get('longdesc')
             loc = request.POST.get('location')
-            if form.cleaned_data['incident_date'] is None:
+            if not request.POST.get('incident_date'):
                 date = None
             else:
                 #convert date format to YYYY-MM-DD from MM/DD/YYYY
@@ -207,10 +212,21 @@ def upload(request):
                 date = date[2] + "-" + date[0] + "-" + date[1]
             key = request.POST.get('keywords')
             priv = request.POST.get('private')
+            group_access = []
             if priv is None:
                 priv = False
+            else:
+                 groups = group.objects.all()
+                #create groups that have access to the report
+                 group_list = []
+                 for g in groups:
+                    users = json.loads(g.users)
+                    if request.session['u'] in users[g.groupName]:
+                        group_list.append(g.groupName)
+                    permission = request.POST.get("Give access to " + g.groupName)
+                    if permission is not None:
+                        group_access.append(g.groupName)
             f = request.FILES.get('file')
-
             # public/private key pair
             random_generator = Random.new().read
             key = RSA.generate(1024, random_generator)
@@ -235,14 +251,22 @@ def upload(request):
 
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f, folder = None)
+
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f, folder = None, group = group_access)
             rep.f = myf
             rep.save()
             return HttpResponse("added successfully")
         else:
             return render(request,'SecureWitness/upload.html', {'form': form})
     elif 'u' in request.session:
-        form = UploadFileForm()
+        #get groups user is in
+        group_list = []
+        groups = group.objects.all()
+        for g in groups:
+            users = json.loads(g.users)
+            if request.session['u'] in users[g.groupName]:
+                group_list.append(g.groupName)
+        form = UploadFileForm(group_list)
         return render(request,'SecureWitness/upload.html', {'form': form})
     else:
         return HttpResponse('You are not logged in')
@@ -322,8 +346,14 @@ def viewReport(request, desc=""):
                 if f:
                     report_list.file = f
                 report_list.save()
-                form = UploadFileForm()
-                #return HttpResponse(template.render(context))
+                #get groups user is in
+                group_list = []
+                groups = group.objects.all()
+                for g in groups:
+                    users = json.loads(g.users)
+                    if request.session['u'] in users[g.groupName]:
+                        group_list.append(g.groupName)
+                form = UploadFileForm(group_list)
                 if short:
                     return HttpResponseRedirect( short)
                 else:
@@ -333,6 +363,13 @@ def viewReport(request, desc=""):
             u = user.objects.filter(username=name)[0]
             report_list = report.objects.filter(shortdesc=desc).filter(author=u)[0]
             template = loader.get_template('SecureWitness/viewReport.html')
+            #get groups user is in
+            group_list = []
+            groups = group.objects.all()
+            for g in groups:
+                users = json.loads(g.users)
+                if request.session['u'] in users[g.groupName]:
+                    group_list.append(g.groupName)
             form = UploadFileForm()
             context = RequestContext(request, {
                     'report': report_list,

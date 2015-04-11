@@ -20,7 +20,7 @@
             <td>{{report.keywords}}</td>
             <td>{{report.incident_date}}</td>
             {% if report.file %}
-            <td><a href = '{{report.file.url}}'>File </a></td>
+            <td><a href = 'http://127.0.0.1:8000/SecureWitness/{{report.file.url}}'>File </a></td>
             {% else %}
             <td>No File</td>
             {% endif %}

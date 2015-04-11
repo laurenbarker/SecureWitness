@@ -1,0 +1,5 @@
+admin1#d74ff0ee8da3b9806b18c877dbf29bbde50b5bd8e4dad7a3a725000feb82e8f1#uva.cs4501+admin1@gmail.com#1
+admin2#d74ff0ee8da3b9806b18c877dbf29bbde50b5bd8e4dad7a3a725000feb82e8f1#uva.cs4501+admin2@gmail.com#1
+user1#d74ff0ee8da3b9806b18c877dbf29bbde50b5bd8e4dad7a3a725000feb82e8f1#uva.cs4501+user1@gmail.com#0
+user2#d74ff0ee8da3b9806b18c877dbf29bbde50b5bd8e4dad7a3a725000feb82e8f1#uva.cs4501+user2@gmail.com#0
+admin3#d74ff0ee8da3b9806b18c877dbf29bbde50b5bd8e4dad7a3a725000feb82e8f1#uva.cs4501+admin3@gmail.com#1
