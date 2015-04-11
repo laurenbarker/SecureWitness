@@ -231,7 +231,7 @@ def upload(request):
                 enc_data = public_key.encrypt(chunk, 32)
                 myf.write(str(enc_data))
 
-            f.name = path2
+            f = path2
 
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
