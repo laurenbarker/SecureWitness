@@ -205,7 +205,7 @@ def upload(request):
                 inc = request.POST.get('incident_date')
                 date = inc.split("/")
                 date = date[2] + "-" + date[0] + "-" + date[1]
-            key = request.POST.get('keywords')
+            kwds = request.POST.get('keywords')
             priv = request.POST.get('private')
             if priv is None:
                 priv = False
@@ -233,7 +233,7 @@ def upload(request):
 
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f, folder = None, key = public_key)
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = None, key = public_key)
             rep.f = myf
             rep.save()
             return HttpResponse("added successfully")
