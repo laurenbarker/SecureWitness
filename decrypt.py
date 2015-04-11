@@ -3,13 +3,15 @@
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto import Random
-
+from os.path import expanduser
 
 # get key from db
 # read in file to enc_data
 
 # decrypt 
 print key.decrypt(enc_data) 
+
+downloads = expanduser("~/Downloads/")
 
 # write back descrypted to file
 
