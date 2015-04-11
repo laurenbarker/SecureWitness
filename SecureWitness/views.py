@@ -210,7 +210,7 @@ def upload(request):
                 inc = request.POST.get('incident_date')
                 date = inc.split("/")
                 date = date[2] + "-" + date[0] + "-" + date[1]
-            key = request.POST.get('keywords')
+            kwds = request.POST.get('keywords')
             priv = request.POST.get('private')
             group_access = []
             if priv is None:
@@ -238,21 +238,18 @@ def upload(request):
             newName = f.name + "_enc"
 
             path2 = os.path.join(settings.MEDIA_ROOT, 'uploaded_files', newName)
+            path = os.path.join('uploaded_files', newName)
             myf = open(path2, "w+b")
-
-            #wipe the existing content
-            #f.truncate()
 
             for chunk in f.chunks():
                 enc_data = public_key.encrypt(chunk, 32)
                 myf.write(str(enc_data))
 
-            f.name = path2
+            f = path
 
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
-
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f, folder = None, group = group_access)
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = None, key = public_key, group = group_access)
             rep.f = myf
             rep.save()
             return HttpResponse("added successfully")
@@ -276,11 +273,6 @@ def homepage(request):
         name = request.session['u']
         u = user.objects.filter(username=name)[0]
 
-        template = loader.get_template('SecureWitness/userhome.html')
-        context = RequestContext(request, {
-            'user' : request.session['u'],
-            'adminStat' : u.adminStatus,
-        })
         return render(request, 'SecureWitness/userhome.html', {
             'user' : request.session['u'],
             'adminStat' : u.adminStatus,

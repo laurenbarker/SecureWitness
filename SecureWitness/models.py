@@ -22,6 +22,7 @@ class report(models.Model):
     group = models.CharField(max_length=500, blank = True)
 #change this line to save files somewhere else
     file = models.FileField( upload_to='uploaded_files',null = True, blank = True)
+    key = models.CharField(max_length=50)
     def __str__(self):
         return self.shortdesc
 
