@@ -249,8 +249,18 @@ def upload(request):
 
 def homepage(request):
     if 'u' in request.session:
-        u = request.user.username
-        return render(request, 'SecureWitness/userhome.html', {'u' : u})
+        name = request.session['u']
+        u = user.objects.filter(username=name)[0]
+
+        template = loader.get_template('SecureWitness/userhome.html')
+        context = RequestContext(request, {
+            'user' : request.session['u'],
+            'adminStat' : u.adminStatus,
+        })
+        return render(request, 'SecureWitness/userhome.html', {
+            'user' : request.session['u'],
+            'adminStat' : u.adminStatus,
+        })
     else:
         return render(request, 'SecureWitness/homepage.html')
 

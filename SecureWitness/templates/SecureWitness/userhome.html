@@ -7,11 +7,20 @@
 <body>
 <h1>SecureWitness</h1>
 
-<b>Welcome {{user}}</b><br/>
+<b>Welcome {{ user }}</b><br/>
 <p> </p>
 <a href="/SecureWitness/search/">Search</a>
 <a href="/SecureWitness/upload/">Upload</a>
 <a href="/SecureWitness/index">Index</a>
+
+<p> </p>
+
+{% if adminStat == 1 %}
+<form action = '/SecureWitness/adminPage/' method = 'POST'>
+	{% csrf_token %}
+	<input type = 'submit' value = 'Admin Homepage'>
+</form>
+{% endif %}
 
 <div style="position: relative">
     <p style="position: fixed; bottom: 0; width:100%;">

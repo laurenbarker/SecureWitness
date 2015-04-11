@@ -86,3 +86,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+

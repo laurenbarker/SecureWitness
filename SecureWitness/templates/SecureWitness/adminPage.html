@@ -7,5 +7,12 @@
 	<a href='/SecureWitness/makeGroup/'>Create Group</a> <br> 
 	<a href='/SecureWitness/addUserToGroup/'>Add User To Group</a> <br>
 	<a href='/SecureWitness/deleteReport/'>Delete A Report </a> <br>
+
+<p> </p>
+<form action = '/SecureWitness/homepage/' method = 'POST'>
+	{% csrf_token %}
+	<input type = 'submit' value = 'General Homepage'>
+</form>
+
  </body>
 </html>
