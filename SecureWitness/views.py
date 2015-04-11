@@ -252,11 +252,6 @@ def homepage(request):
         name = request.session['u']
         u = user.objects.filter(username=name)[0]
 
-        template = loader.get_template('SecureWitness/userhome.html')
-        context = RequestContext(request, {
-            'user' : request.session['u'],
-            'adminStat' : u.adminStatus,
-        })
         return render(request, 'SecureWitness/userhome.html', {
             'user' : request.session['u'],
             'adminStat' : u.adminStatus,
