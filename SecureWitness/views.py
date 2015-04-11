@@ -225,9 +225,6 @@ def upload(request):
             path = os.path.join('uploaded_files', newName)
             myf = open(path2, "w+b")
 
-            #wipe the existing content
-            #f.truncate()
-
             for chunk in f.chunks():
                 enc_data = public_key.encrypt(chunk, 32)
                 myf.write(str(enc_data))
@@ -236,7 +233,7 @@ def upload(request):
 
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f, folder = None)
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = key, private = priv, file = f, folder = None, key = public_key)
             rep.f = myf
             rep.save()
             return HttpResponse("added successfully")
