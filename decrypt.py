@@ -4,6 +4,11 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from os.path import expanduser
+import sys
+
+# user enters file to decrypt
+file_enc = input('Please enter the file you wish to decrypt: ')
+
 
 # get key from db
 # read in file to enc_data

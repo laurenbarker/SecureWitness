@@ -250,7 +250,7 @@ def upload(request):
 
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = None, key = public_key, group = group_access)
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = None, key = key, group = group_access)
             rep.f = myf
             rep.save()
             return HttpResponse("added successfully")
