@@ -57,7 +57,7 @@ docs/_build/
 target/
 
 # database
-dq.sqlite3
+db.sqlite3
 
 # uploaded files
 uploaded_files
