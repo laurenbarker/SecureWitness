@@ -64,3 +64,6 @@ uploaded_files
 
 # migrations
 migrations
+
+# idea file
+.idea

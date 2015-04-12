@@ -1,9 +1,8 @@
 <form action = '/SecureWitness/addUserToGroup/' method = 'POST'>
 	{% csrf_token %}
 	<table align="left">
-    {{ form.as_table }}
+    {{ form.as_p }}
     </table>
-    <br><br><br><br>
 	<input type = 'submit' value='Add User'>
 </form>
 
