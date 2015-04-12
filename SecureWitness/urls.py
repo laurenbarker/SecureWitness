@@ -19,6 +19,7 @@ urlpatterns = patterns('',
     url(r'^giveAdminAccess/$', views.giveAdminAccess, name = 'giveAdminAccess'),
     url(r'^makeGroup/$', views.makeGroup, name='makeGroup'),
    	url(r'^addUserToGroup/$', views.addUserToGroup, name = 'addUserToGroup'),
+    url(r'^addToGroupUser/$', views.addToGroupUser, name = 'addToGroupUser'),
     url(r'^changeUserSuspensionStatus/$', views.changeUserSuspensionStatus, name = 'changeUserSuspensionStatus'),
     url(r'^deleteReport/$', views.deleteReport, name = 'deleteReport'),
 )

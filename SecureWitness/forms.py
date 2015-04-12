@@ -12,8 +12,12 @@ class CreateGroupForm(forms.Form):
 	groupName = forms.CharField(label='Group Name', max_length = 100)
 
 class addUserForm(forms.Form):
-	username = forms.CharField(label = 'Add User', max_length = 100)
-	toGroup = forms.CharField(label = 'To Group' , max_length = 100)
+    username = forms.CharField(label = 'Add User', max_length = 100)
+
+    def __init__(self,group_list = [], Post=""):
+        super(addUserForm, self).__init__()
+        for group in group_list:
+            self.fields[group] = forms.BooleanField(required=False)
 
 class suspendUserForm(forms.Form):
     username = forms.CharField(label='Username', max_length = 100)
