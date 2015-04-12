@@ -436,8 +436,8 @@ def addToGroupUser(request):
                     theGroup = group.objects.get(groupName=g)
                     users = json.loads(theGroup.users)
 
-                    if username not in users[groupname]:
-                        users[groupname].append(username)
+                    if username not in users[g]:
+                        users[g].append(username)
                         theGroup.users = json.dumps(users)
                         theGroup.save()
                         return HttpResponse("User was successfully added")
@@ -517,8 +517,8 @@ def addUserToGroup(request):
                     theGroup = group.objects.get(groupName=g)
                     users = json.loads(theGroup.users)
 
-                    if username not in users[groupname]:
-                        users[groupname].append(username)
+                    if username not in users[g]:
+                        users[g].append(username)
                         theGroup.users = json.dumps(users)
                         theGroup.save()
                         return HttpResponse("User was successfully added")
