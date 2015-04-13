@@ -19,6 +19,9 @@ urlpatterns = patterns('',
     url(r'^giveAdminAccess/$', views.giveAdminAccess, name = 'giveAdminAccess'),
     url(r'^makeGroup/$', views.makeGroup, name='makeGroup'),
    	url(r'^addUserToGroup/$', views.addUserToGroup, name = 'addUserToGroup'),
+    url(r'^addToGroupUser/$', views.addToGroupUser, name = 'addToGroupUser'),
     url(r'^changeUserSuspensionStatus/$', views.changeUserSuspensionStatus, name = 'changeUserSuspensionStatus'),
     url(r'^deleteReport/$', views.deleteReport, name = 'deleteReport'),
+    url(r'^login_decrypt/$', views.login_decrypt, name = 'login_decrpyt'),
+    url(r'^viewFiles_decrypt/$', views.viewFiles_decrypt, name = 'viewFiles_decrpyt')
 )

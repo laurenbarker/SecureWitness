@@ -13,6 +13,7 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 #put forms in forms.py later
 from django import forms
@@ -83,6 +84,34 @@ def login(request):
     else:
         form = loginForm()
     return render(request, 'SecureWitness/login.html', {'form': form})
+
+@csrf_exempt
+def login_decrypt(request):
+    # get username and password from app
+    u = request.POST.get('username')
+    pw = request.POST.get('password')
+    # check and see if that user exists
+    users = user.objects.filter(username=u).filter(password=pw)
+
+    if(len(users) > 0):
+        if users[0].adminStatus == 1:
+            #form = GiveAdminAccessForm()
+            return HttpResponse('You are an administrator')
+        elif users[0].suspensionStatus == 1:
+            return HttpResponse('Your account has been suspended by an administrator')
+        else:
+            return HttpResponse('Authentication succeeded.')
+    else:
+        return HttpResponse("unsuccessful authentication")
+
+@csrf_exempt
+def viewFiles_decrypt(request):
+    # get reports for user
+    name = request.POST.get('username')
+    u = user.objects.filter(username=name)[0]
+    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
+    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+    return HttpResponse(report_list)
 
 def index(request):
     if 'u' in request.session:
@@ -226,6 +255,7 @@ def upload(request):
                     permission = request.POST.get("Give access to " + g.groupName)
                     if permission is not None:
                         group_access.append(g.groupName)
+
             f = request.FILES.get('file')
             # public/private key pair
             random_generator = Random.new().read
@@ -249,7 +279,7 @@ def upload(request):
 
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = None, key = public_key, group = group_access)
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = None, key = key, group = group_access)
             rep.f = myf
             rep.save()
             return HttpResponse("added successfully")
@@ -413,6 +443,47 @@ def renameFolder(request, folder=""):
     else:
         return HttpResponse("You are not logged in")
 
+def addToGroupUser(request):
+    groups = group.objects.all()
+    group_list = []
+    for g in groups:
+        users = json.loads(g.users)
+        if request.session['u'] in users[g.groupName]:
+            group_list.append(g.groupName)
+          
+    if request.method == 'POST':
+        form = addUserForm([], request.POST)
+        if request.POST.get('username'):
+            username = request.POST.get('username').strip()
+
+            group_checked = False
+
+            for g in group_list:
+                access = request.POST.get(g)
+
+                if access is not None:
+                    theGroup = group.objects.get(groupName=g)
+                    users = json.loads(theGroup.users)
+
+                    if username not in users[g]:
+                        users[g].append(username)
+                        theGroup.users = json.dumps(users)
+                        theGroup.save()
+                        return HttpResponse("User was successfully added")
+                    else:
+                        return HttpResponse("User is already in this group")
+
+                    group_checked = True
+
+            if group_checked == False:
+                return HttpResponse("Please check at least 1 group")
+
+        else:
+            return HttpResponse("Please enter a username")
+    else:
+        form = addUserForm(group_list)
+        return render(request, 'SecureWitness/addUser.html', {'form' : form })
+
 def adminPage(request):
     return render(request, 'SecureWitness/adminPage.html')
 
@@ -455,45 +526,43 @@ def makeGroup(request):
 
 
 def addUserToGroup(request):
+    groups = group.objects.all()
+    group_list = []
+    for g in groups:
+        users = json.loads(g.users)
+        group_list.append(g.groupName)
+          
     if request.method == 'POST':
-        form = addUserForm(request.POST)
-        if form.is_valid():
-            authorization = False
-            username = user.objects.get(username = request.session['u'])
-            admin_status = username.adminStatus
-            #either user is an admin or member of a group
-            if admin_status:
-                authorization = True
-            username = form.cleaned_data['username'].strip()
-            groupname = form.cleaned_data['toGroup'].strip()
-            group_list = []
-            groups = group.objects.all()
-            for g in groups:
-                users = json.loads(g.users)
-                if request.session['u'] in users[g.groupName]:
-                    group_list.append(g.groupName)
-            if groupname in group_list:
-                authorization = True
+        form = addUserForm([], request.POST)
+        if request.POST.get('username'):
+            username = request.POST.get('username').strip()
 
-            if group.objects.filter(groupName = groupname).exists() and user.objects.filter(username = username).exists():
-                theGroup = group.objects.get(groupName=groupname)
-                users = json.loads(theGroup.users)
-                if username not in users[groupname]:
-                    users[groupname].append(username)
-                    theGroup.users = json.dumps(users)
-                    theGroup.save()
-                    return HttpResponse("User was successfully added")
-                else:
-                    return HttpResponse("User is already in this group")
-            else:
-                return HttpResponse("Please enter a valid username AND a valid group name")
+            group_checked = False
+
+            for g in group_list:
+                access = request.POST.get(g)
+
+                if access is not None:
+                    theGroup = group.objects.get(groupName=g)
+                    users = json.loads(theGroup.users)
+
+                    if username not in users[g]:
+                        users[g].append(username)
+                        theGroup.users = json.dumps(users)
+                        theGroup.save()
+                        return HttpResponse("User was successfully added")
+                    else:
+                        return HttpResponse("User is already in this group")
+
+                    group_checked = True
+
+            if group_checked == False:
+                return HttpResponse("Please check at least 1 group")
         else:
-            return HttpResponse("Please enter a username and a group name.")
+            return HttpResponse("Please enter a username")
     else:
-        username = user.objects.get(username = request.session['u'])
-        admin_status = username.adminStatus
-        form = addUserForm()
-        return render(request, 'SecureWitness/addUser.html', {'form' : form, 'admin': admin_status})
+        form = addUserForm(group_list)
+        return render(request, 'SecureWitness/addUser.html', {'form' : form })
 
 def changeUserSuspensionStatus(request):
     if request.method == 'POST':
