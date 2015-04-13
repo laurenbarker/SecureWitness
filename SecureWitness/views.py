@@ -494,7 +494,10 @@ def addToGroupUser(request):
         return render(request, 'SecureWitness/addUser.html', {'form' : form })
 
 def adminPage(request):
-    return render(request, 'SecureWitness/adminPage.html')
+    if user.objects.get(username=request.session['u']).adminStatus == 1:
+        return render(request, 'SecureWitness/adminPage.html')
+    else:
+        return HttpResponse("You are not an admin")
 
 def giveAdminAccess(request):
     if request.method == 'POST':
