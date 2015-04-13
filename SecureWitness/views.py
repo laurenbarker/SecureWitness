@@ -87,14 +87,13 @@ def login(request):
 
 @csrf_exempt
 def login_decrypt(request):
-    # process the data in form.cleaned_data as required
-    # redirect to a new URL:
+    # get username and password from app
     u = request.POST.get('username')
     pw = request.POST.get('password')
+    # check and see if that user exists
     users = user.objects.filter(username=u).filter(password=pw)
 
     if(len(users) > 0):
-        #request.session['u'] = u
         if users[0].adminStatus == 1:
             #form = GiveAdminAccessForm()
             return HttpResponse('You are an administrator')
@@ -107,6 +106,7 @@ def login_decrypt(request):
 
 @csrf_exempt
 def viewFiles_decrypt(request):
+    # get reports for user
     name = request.POST.get('username')
     u = user.objects.filter(username=name)[0]
     report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
