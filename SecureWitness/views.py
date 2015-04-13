@@ -137,16 +137,25 @@ def index(request):
                 folders[item.folder] = 1
             else:
                 folders[item.folder] += 1
+
+        list = group.objects.all()
+        group_list = []
+        for g in list:
+            if name in g.users:
+                group_list.append(g.groupName)
+
         template = loader.get_template('SecureWitness/index.html')
         context = RequestContext(request, {
             'report_list': report_list,
             'user' : request.session['u'],
-            'folder_list' : folders
+            'folder_list' : folders,
+            'group_list' : group_list,
         })
         return render(request, 'SecureWitness/index.html', {
             'report_list': report_list,
             'user' : request.session['u'],
-            'folder_list' : folders
+            'folder_list' : folders,
+            'group_list' : group_list,
         })
     else:
         return HttpResponse("You are not logged in")
@@ -456,161 +465,185 @@ def renameFolder(request, folder=""):
         return HttpResponse("You are not logged in")
 
 def addToGroupUser(request):
-    groups = group.objects.all()
-    group_list = []
-    for g in groups:
-        users = json.loads(g.users)
-        if request.session['u'] in users[g.groupName]:
-            group_list.append(g.groupName)
+    if 'u' in request.session:
+        groups = group.objects.all()
+        group_list = []
+        for g in groups:
+            users = json.loads(g.users)
+            if request.session['u'] in users[g.groupName]:
+                group_list.append(g.groupName)
           
-    if request.method == 'POST':
-        form = addUserForm([], request.POST)
-        if request.POST.get('username'):
-            username = request.POST.get('username').strip()
+        if request.method == 'POST':
+            form = addUserForm([], request.POST)
+            if request.POST.get('username'):
+                username = request.POST.get('username').strip()
 
-            group_checked = False
+                group_checked = False
 
-            for g in group_list:
-                access = request.POST.get(g)
+                for g in group_list:
+                    access = request.POST.get(g)
 
-                if access is not None:
-                    theGroup = group.objects.get(groupName=g)
-                    users = json.loads(theGroup.users)
+                    if access is not None:
+                        theGroup = group.objects.get(groupName=g)
+                        users = json.loads(theGroup.users)
 
-                    if username not in users[g]:
-                        users[g].append(username)
-                        theGroup.users = json.dumps(users)
-                        theGroup.save()
-                        return HttpResponse("User was successfully added")
-                    else:
-                        return HttpResponse("User is already in this group")
+                        if username not in users[g]:
+                            users[g].append(username)
+                            theGroup.users = json.dumps(users)
+                            theGroup.save()
+                            return HttpResponse("User was successfully added")
+                        else:
+                            return HttpResponse("User is already in this group")
 
-                    group_checked = True
+                        group_checked = True
 
-            if group_checked == False:
-                return HttpResponse("Please check at least 1 group")
+                if group_checked == False:
+                    return HttpResponse("Please check at least 1 group")
 
+            else:
+                return HttpResponse("Please enter a username")
         else:
-            return HttpResponse("Please enter a username")
+            form = addUserForm(group_list)
+            return render(request, 'SecureWitness/addUser.html', {'form' : form })
     else:
-        form = addUserForm(group_list)
-        return render(request, 'SecureWitness/addUser.html', {'form' : form })
+        return HttpResponse("You are not logged in")
 
 def adminPage(request):
-    return render(request, 'SecureWitness/adminPage.html')
+    if 'u' in request.session:
+        if user.objects.get(username=request.session['u']).adminStatus == 1:
+            return render(request, 'SecureWitness/adminPage.html')
+        else:
+            return HttpResponse("You are not an admin")
+    else:
+        return HttpResponse("You are not logged in")
 
 def giveAdminAccess(request):
-    if request.method == 'POST':
-        form = GiveAdminAccessForm(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data['username'].strip()
+    if 'u' in request.session:
+        if request.method == 'POST':
+            form = GiveAdminAccessForm(request.POST)
+            if form.is_valid():
+                name = form.cleaned_data['username'].strip()
 
-            try: 
-                users = user.objects.get(username=name)
-                users.adminStatus = 1
-                users.save()
-                return HttpResponse("User was given admin access")
-            except:
-                return HttpResponse("User does not exist")
+                try:
+                    users = user.objects.get(username=name)
+                    users.adminStatus = 1
+                    users.save()
+                    return HttpResponse("User was given admin access")
+                except:
+                    return HttpResponse("User does not exist")
 
+            else:
+                return HttpResponse("Please enter a user")
         else:
-            return HttpResponse("Please enter a user")
+            form = GiveAdminAccessForm()
+            return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form })
     else:
-        form = GiveAdminAccessForm()
-        return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form })
+        return HttpResponse("You are not logged in")
 
 def makeGroup(request):
-    if request.method == 'POST':
-        form = CreateGroupForm(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data['groupName']
-            if group.objects.filter(groupName = name).exists():
-                return HttpResponse("Group already exists")
-            else:
-                users = {}
-                users[name] = []
-                myGroup = group(groupName = name, users = json.dumps(users))
-                myGroup.save()
-                return HttpResponse("Group was successfully created!")
+    if 'u' in request.session:
+        if request.method == 'POST':
+            form = CreateGroupForm(request.POST)
+            if form.is_valid():
+                name = form.cleaned_data['groupName']
+                if group.objects.filter(groupName = name).exists():
+                    return HttpResponse("Group already exists")
+                else:
+                    users = {}
+                    users[name] = []
+                    myGroup = group(groupName = name, users = json.dumps(users))
+                    myGroup.save()
+                    return HttpResponse("Group was successfully created!")
+        else:
+            form = CreateGroupForm()
+            return render(request, 'SecureWitness/createGroup.html', { 'form' : form } )
     else:
-        form = CreateGroupForm()
-        return render(request, 'SecureWitness/createGroup.html', { 'form' : form } )
+        return HttpResponse("You are not logged in")
 
 
 def addUserToGroup(request):
-    groups = group.objects.all()
-    group_list = []
-    for g in groups:
-        users = json.loads(g.users)
-        group_list.append(g.groupName)
+    if 'u' in request.session:
+        groups = group.objects.all()
+        group_list = []
+        for g in groups:
+            users = json.loads(g.users)
+            group_list.append(g.groupName)
           
-    if request.method == 'POST':
-        form = addUserForm([], request.POST)
-        if request.POST.get('username'):
-            username = request.POST.get('username').strip()
+        if request.method == 'POST':
+            form = addUserForm([], request.POST)
+            if request.POST.get('username'):
+                username = request.POST.get('username').strip()
 
-            group_checked = False
+                group_checked = False
 
-            for g in group_list:
-                access = request.POST.get(g)
+                for g in group_list:
+                    access = request.POST.get(g)
 
-                if access is not None:
-                    theGroup = group.objects.get(groupName=g)
-                    users = json.loads(theGroup.users)
+                    if access is not None:
+                        theGroup = group.objects.get(groupName=g)
+                        users = json.loads(theGroup.users)
 
-                    if username not in users[g]:
-                        users[g].append(username)
-                        theGroup.users = json.dumps(users)
-                        theGroup.save()
-                        return HttpResponse("User was successfully added")
-                    else:
-                        return HttpResponse("User is already in this group")
+                        if username not in users[g]:
+                            users[g].append(username)
+                            theGroup.users = json.dumps(users)
+                            theGroup.save()
+                            return HttpResponse("User was successfully added")
+                        else:
+                            return HttpResponse("User is already in this group")
 
-                    group_checked = True
+                        group_checked = True
 
-            if group_checked == False:
-                return HttpResponse("Please check at least 1 group")
+                if group_checked == False:
+                    return HttpResponse("Please check at least 1 group")
+            else:
+                return HttpResponse("Please enter a username")
         else:
-            return HttpResponse("Please enter a username")
+            form = addUserForm(group_list)
+            return render(request, 'SecureWitness/addUser.html', {'form' : form })
     else:
-        form = addUserForm(group_list)
-        return render(request, 'SecureWitness/addUser.html', {'form' : form })
+        return HttpResponse("You are not logged in")
 
 def changeUserSuspensionStatus(request):
-    if request.method == 'POST':
-        form = suspendUserForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username'].strip()
-            try: 
-                users = user.objects.get(username=username)
-                if 'suspend' in request.POST:
-                    users.suspensionStatus = 1
-                    users.save()
-                    return HttpResponse("User was suspended")
-                else:
-                    users.suspensionStatus = 0
-                    users.save()
-                    return HttpResponse("User was unsuspended")
-            except:
-                return HttpResponse("User does not exist")
+    if 'u' in request.session:
+        if request.method == 'POST':
+            form = suspendUserForm(request.POST)
+            if form.is_valid():
+                username = form.cleaned_data['username'].strip()
+                try:
+                    users = user.objects.get(username=username)
+                    if 'suspend' in request.POST:
+                        users.suspensionStatus = 1
+                        users.save()
+                        return HttpResponse("User was suspended")
+                    else:
+                        users.suspensionStatus = 0
+                        users.save()
+                        return HttpResponse("User was unsuspended")
+                except:
+                    return HttpResponse("User does not exist")
+            else:
+                return HttpResponse("Please enter a username")
         else:
-            return HttpResponse("Please enter a username")
+            form = suspendUserForm()
+            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', { 'form' : form })
     else:
-        form = suspendUserForm()
-        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', { 'form' : form })
+        return HttpResponse("You are not logged in")
 
 def deleteReport(request):
-    if request.method == 'POST':
-        form = deleteReportForm(request.POST)
-        if form.is_valid():
-            shortdesc = form.cleaned_data['shortdesc'].strip()
-            try:
-                someReport = report.objects.get(shortdesc=shortdesc).delete()
-                return HttpResponse("Report has been deleted!")
-            except:
-                return HttpResponse("Report with given shortdesc does not exist!")
+    if 'u' in request.session:
+        if request.method == 'POST':
+            form = deleteReportForm(request.POST)
+            if form.is_valid():
+                shortdesc = form.cleaned_data['shortdesc'].strip()
+                try:
+                    someReport = report.objects.get(shortdesc=shortdesc).delete()
+                    return HttpResponse("Report has been deleted!")
+                except:
+                    return HttpResponse("Report with given shortdesc does not exist!")
+            else:
+                return HttpResponse("Please enter a shortdesc")
         else:
-            return HttpResponse("Please enter a shortdesc")
+            form = deleteReportForm()
+            return render(request, 'SecureWitness/deleteReport.html', { 'form' : form })
     else:
-        form = deleteReportForm()
-        return render(request, 'SecureWitness/deleteReport.html', { 'form' : form })
+        return HttpResponse("You are not logged in")
