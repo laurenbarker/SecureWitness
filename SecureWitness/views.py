@@ -13,6 +13,7 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 #put forms in forms.py later
 from django import forms
@@ -83,6 +84,27 @@ def login(request):
     else:
         form = loginForm()
     return render(request, 'SecureWitness/login.html', {'form': form})
+
+@csrf_exempt
+def login_decrypt(request):
+    # process the data in form.cleaned_data as required
+    # redirect to a new URL:
+    u = request.POST.get('username')
+    pw = request.POST.get('password')
+    users = user.objects.filter(username=u).filter(password=pw)
+
+    if(len(users) > 0):
+        #request.session['u'] = u
+        if users[0].adminStatus == 1:
+            #form = GiveAdminAccessForm()
+            return HttpResponse('You are an administrator')
+        elif users[0].suspensionStatus == 1:
+            return HttpResponse('Your account has been suspended by an administrator')
+        else:
+            return HttpResponse('Authentication succeeded.')
+    else:
+        return HttpResponse("unsuccessful authentication")
+
 
 def index(request):
     if 'u' in request.session:
