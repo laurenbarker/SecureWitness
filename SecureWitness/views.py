@@ -125,16 +125,25 @@ def index(request):
                 folders[item.folder] = 1
             else:
                 folders[item.folder] += 1
+
+        list = group.objects.all()
+        group_list = []
+        for g in list:
+            if name in g.users:
+                group_list.append(g.groupName)
+
         template = loader.get_template('SecureWitness/index.html')
         context = RequestContext(request, {
             'report_list': report_list,
             'user' : request.session['u'],
-            'folder_list' : folders
+            'folder_list' : folders,
+            'group_list' : group_list,
         })
         return render(request, 'SecureWitness/index.html', {
             'report_list': report_list,
             'user' : request.session['u'],
-            'folder_list' : folders
+            'folder_list' : folders,
+            'group_list' : group_list,
         })
     else:
         return HttpResponse("You are not logged in")
