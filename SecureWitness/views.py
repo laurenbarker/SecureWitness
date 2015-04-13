@@ -458,8 +458,23 @@ def addUserToGroup(request):
     if request.method == 'POST':
         form = addUserForm(request.POST)
         if form.is_valid():
+            authorization = False
+            username = user.objects.get(username = request.session['u'])
+            admin_status = username.adminStatus
+            #either user is an admin or member of a group
+            if admin_status:
+                authorization = True
             username = form.cleaned_data['username'].strip()
             groupname = form.cleaned_data['toGroup'].strip()
+            group_list = []
+            groups = group.objects.all()
+            for g in groups:
+                users = json.loads(g.users)
+                if request.session['u'] in users[g.groupName]:
+                    group_list.append(g.groupName)
+            if groupname in group_list:
+                authorization = True
+
             if group.objects.filter(groupName = groupname).exists() and user.objects.filter(username = username).exists():
                 theGroup = group.objects.get(groupName=groupname)
                 users = json.loads(theGroup.users)
@@ -475,8 +490,10 @@ def addUserToGroup(request):
         else:
             return HttpResponse("Please enter a username and a group name.")
     else:
+        username = user.objects.get(username = request.session['u'])
+        admin_status = username.adminStatus
         form = addUserForm()
-        return render(request, 'SecureWitness/addUser.html', {'form' : form })
+        return render(request, 'SecureWitness/addUser.html', {'form' : form, 'admin': admin_status})
 
 def changeUserSuspensionStatus(request):
     if request.method == 'POST':

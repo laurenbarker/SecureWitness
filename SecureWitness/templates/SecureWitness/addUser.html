@@ -6,8 +6,9 @@
     <br><br><br><br>
 	<input type = 'submit' value='Add User'>
 </form>
-
+{% if admin %}
 <form action = '/SecureWitness/adminPage/' method = 'POST'>
 	{% csrf_token %}
 	<input type = 'submit' value = 'Return To Admin Page'>
 </form>
+{% endif %}
