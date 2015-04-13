@@ -200,6 +200,27 @@ def search(request):
             else:
                 desclist = list(set(desclist) | set(inc_list))
 
+            #remove reports user is not authorized to see
+            name = request.session['u']
+            u = user.objects.filter(username=name)[0]
+            if not u.adminStatus:
+                groups = group.objects.all()
+                #create groups user is in
+                group_list = []
+                for g in groups:
+                    users = json.loads(g.users)
+                    if request.session['u'] in users[g.groupName]:
+                        group_list.append(g.groupName)
+                for item in desclist:
+                    if item.author != u and item.private:
+                        authorization = False
+                        for x in group_list:
+                            if x in item.group:
+                                authorization = True
+                        if not authorization:
+                            desclist.remove(item)
+
+
             report_list = []
             folders = {}
             for item in desclist:
@@ -257,30 +278,31 @@ def upload(request):
                         group_access.append(g.groupName)
 
             f = request.FILES.get('file')
-            # public/private key pair
-            random_generator = Random.new().read
-            key = RSA.generate(1024, random_generator)
+            if f:
+                # public/private key pair
+                random_generator = Random.new().read
+                key = RSA.generate(1024, random_generator)
 
-            # encrypt
-            public_key = key.publickey()
-            # change
+                # encrypt
+                public_key = key.publickey()
+                # change
 
-            newName = f.name + "_enc"
+                newName = f.name + "_enc"
 
-            path2 = os.path.join(settings.MEDIA_ROOT, 'uploaded_files', newName)
-            path = os.path.join('uploaded_files', newName)
-            myf = open(path2, "w+b")
+                path2 = os.path.join(settings.MEDIA_ROOT, 'uploaded_files', newName)
+                path = os.path.join('uploaded_files', newName)
+                myf = open(path2, "w+b")
 
-            for chunk in f.chunks():
-                enc_data = public_key.encrypt(chunk, 32)
-                myf.write(str(enc_data))
-
-            f = path
-
+                for chunk in f.chunks():
+                    enc_data = public_key.encrypt(chunk, 32)
+                    myf.write(str.encode(str(enc_data)))
+            else:
+                key = ""
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
             rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = None, key = key, group = group_access)
-            rep.f = myf
+            if f:
+                rep.f = myf
             rep.save()
             return HttpResponse("added successfully")
         else:
