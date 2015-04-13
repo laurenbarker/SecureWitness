@@ -23,5 +23,6 @@ urlpatterns = patterns('',
     url(r'^changeUserSuspensionStatus/$', views.changeUserSuspensionStatus, name = 'changeUserSuspensionStatus'),
     url(r'^deleteReport/$', views.deleteReport, name = 'deleteReport'),
     url(r'^login_decrypt/$', views.login_decrypt, name = 'login_decrpyt'),
-    url(r'^viewFiles_decrypt/$', views.viewFiles_decrypt, name = 'viewFiles_decrpyt')
+    url(r'^viewFiles_decrypt/$', views.viewFiles_decrypt, name = 'viewFiles_decrpyt'),
+    url(r'^viewAvailableReports/$', views.viewAvailableReports, name = 'viewAvailableReports'),
 )
