@@ -60,8 +60,19 @@
 {% if not report_list and not folder_list %}
     <p>No reports are available.</p>
 {% endif %}
-<a href="/SecureWitness/search/">Search</a>
+
+<p><b>Groups for {{user}}</b></p>
+    {% if group_list %}
+        {% for group in group_list %}
+            <p>{{ group }}</p>
+        {%  endfor %}
+    {% elif not group_list %}
+    <p>{{user}} is not in any groups</p>
+    {% endif %}
+
+
+<!--<a href="/SecureWitness/search/">Search</a>
 <a href="/SecureWitness/upload/">Upload</a>
-<a href="/SecureWitness/index">Index</a>
+<a href="/SecureWitness/index">Index</a>-->
 </body>
 </html>
