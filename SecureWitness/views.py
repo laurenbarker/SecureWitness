@@ -110,8 +110,20 @@ def viewFiles_decrypt(request):
     name = request.POST.get('username')
     u = user.objects.filter(username=name)[0]
     report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
-    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
-    return HttpResponse(report_list)
+    groups = group.objects.all()
+    #create groups that have access to the report
+    group_list = []
+    for g in groups:
+        users = json.loads(g.users)
+        if u in users[g.groupName]:
+            group_list.append(g.groupName)
+    grp = ""
+    for g in group_list:
+        grp = grp + g
+
+    #ob_list = report.objects.filter(reduce(lambda x, y: x | y, [Q(name__contains=word) for word in group_list]))
+    #return HttpResponse(str(report_list) + grp)
+    return HttpResponse(groups)
 
 def index(request):
     if 'u' in request.session:
