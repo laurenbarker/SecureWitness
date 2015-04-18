@@ -170,9 +170,6 @@ def search(request):
         form = NameForm(request.POST)
         # check whether it's valid:
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
             loclist = []
             keylist = []
             desclist = []
@@ -241,22 +238,11 @@ def search(request):
                         if not authorization:
                             desclist.remove(item)
 
-
-            report_list = []
-            folders = {}
-            for item in desclist:
-                if not item.folder:
-                    report_list.append(item)
-                else:
-                    if item.folder not in folders:
-                        folders[item.folder] = 1
-                    else:
-                        folders[item.folder] += 1
             template = loader.get_template('SecureWitness/index.html')
             context = RequestContext(request, {
-                  'report_list': report_list,
-                  'folder_list': folders,
-                  'search' : 'yes'
+                  'report_list': desclist,
+                  'search' : 'yes',
+                  'user' : request.session['u'],
             })
             return HttpResponse(template.render(context))
     # if a GET (or any other method) we'll create a blank form
@@ -524,9 +510,11 @@ def addToGroupUser(request):
 
             else:
                 return HttpResponse("Please enter a username")
-        else:
+        elif len(group_list > 0):
             form = addUserForm(group_list)
             return render(request, 'SecureWitness/addUser.html', {'form' : form })
+        else:
+            return HttpResponse("You are not in any groups.")
     else:
         return HttpResponse("You are not logged in")
 
