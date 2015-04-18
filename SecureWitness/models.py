@@ -24,7 +24,7 @@ class report(models.Model):
     file = models.FileField(upload_to='uploaded_files',null = True, blank = True)
     key = models.CharField(blank = True, max_length=2048)
     def __str__(self):
-        return self.shortdesc
+        return   self.shortdesc
 
 class group(models.Model):
     users = models.CharField(max_length=500, blank=True)

@@ -35,9 +35,9 @@ print ('Your input was' + " " + file_enc)
 # check if user has access via django server and get key to decrypt
 
 # gets file to decrpyt
-#r = requests.get('http://localhost:8000/SecureWitness/uploaded_files/' + file_enc)
+r = requests.get('http://localhost:8000/SecureWitness/uploaded_files/' + file_enc)
 #r = requests.get('http://localhost:8000/SecureWitness/login')
-#print r.text
+print r.text
 
 # read in file to enc_data
 
