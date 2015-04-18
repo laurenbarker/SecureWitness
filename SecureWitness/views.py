@@ -317,6 +317,8 @@ def upload(request):
                 for chunk in f.chunks():
                     enc_data = public_key.encrypt(chunk, 32)
                     myf.write(str.encode(str(enc_data)))
+
+                f = path
             else:
                 key = ""
             name = request.session['u']
