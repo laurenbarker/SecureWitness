@@ -1,3 +1,4 @@
+{% if ingroups %}
 <form action = '/SecureWitness/addUserToGroup/' method = 'POST'>
 	{% csrf_token %}
 	<table align="left">
@@ -5,6 +6,10 @@
     </table>
 	<input type = 'submit' value='Add User'>
 </form>
+{% else %}
+    You are not in any groups.<br/>
+    <a href="/SecureWitness/homepage/">Click here to return to homepage.</a>
+{% endif %}
 {% if admin %}
 <form action = '/SecureWitness/adminPage/' method = 'POST'>
 	{% csrf_token %}

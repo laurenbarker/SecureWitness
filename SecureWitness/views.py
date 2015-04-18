@@ -303,6 +303,7 @@ def upload(request):
                 for chunk in f.chunks():
                     enc_data = public_key.encrypt(chunk, 32)
                     myf.write(str.encode(str(enc_data)))
+                f = path
             else:
                 key = ""
             name = request.session['u']
@@ -510,11 +511,12 @@ def addToGroupUser(request):
 
             else:
                 return HttpResponse("Please enter a username")
-        elif len(group_list > 0):
+        elif len(group_list) > 0:
             form = addUserForm(group_list)
-            return render(request, 'SecureWitness/addUser.html', {'form' : form })
+            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True })
         else:
-            return HttpResponse("You are not in any groups.")
+            form = addUserForm(group_list)
+            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':False })
     else:
         return HttpResponse("You are not logged in")
 
