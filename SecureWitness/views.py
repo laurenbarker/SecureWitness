@@ -65,11 +65,17 @@ def login(request):
             users = user.objects.filter(username=u).filter(password=pw)
             if(form.cleaned_data['Register']):
                 if(len(user.objects.filter(username=u)) > 0):
-                    return HttpResponse('username already taken')
+                    return render(request, 'SecureWitness/login.html', {
+                        'alreadytaken' : True,
+                        'form' : loginForm(),
+                    })
                 else:
                     newuser = user(username=u, password=pw)
                     newuser.save()
-                    return HttpResponse("new user created successfully")
+                    return render(request, 'SecureWitness/login.html', {
+                        'newuser' : True,
+                        'form' : loginForm(),
+                    })
             elif(len(users) > 0):
                 request.session['u'] = u
                 if users[0].adminStatus == 1:
@@ -80,7 +86,11 @@ def login(request):
                 else:
                     return render(request, 'SecureWitness/userhome.html', {'u' : u})
             else:
-                return HttpResponse("unsuccessful login")
+                return render(request, 'SecureWitness/login.html', {
+                    'nosuccess' : True,
+                    'form' : loginForm(),
+                })
+
     # if a GET (or any other method) we'll create a blank form
     else:
         form = loginForm()

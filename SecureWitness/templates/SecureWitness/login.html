@@ -7,6 +7,16 @@
 <body>
 <h1>SecureWitness</h1>
 <h3>Login or Register</h3>
+
+{% if nosuccess %}
+    <p>Unsuccessful login</p>
+{% elif alreadytaken %}
+    <p>Username already taken</p>
+{% elif newuser %}
+    <p>New user created successfully. Please login with your new account.</p>
+{% endif %}
+
+
 <form action="/SecureWitness/login/" method="post">
     {% csrf_token %}
  <table style="color:black;text-align:left;">
@@ -14,6 +24,8 @@
      </table>
     <input type="submit" value="Login" >
 </form>
+
+
 
 </body>
 </html>
