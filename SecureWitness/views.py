@@ -432,6 +432,9 @@ def viewReport(request, desc=""):
     else:
          return HttpResponse("You are not logged in")
 
+def viewAvailableReports(request):
+    return HttpResponse("HI")
+
 def deleteFolder(request, folder=""):
     if 'u' in request.session:
         report_list = report.objects.filter(folder = folder).delete()
@@ -481,6 +484,9 @@ def addToGroupUser(request):
             users = json.loads(g.users)
             if request.session['u'] in users[g.groupName]:
                 group_list.append(g.groupName)
+
+        if len(group_list) == 0:
+            return HttpResponse("You are not in any groups")
           
         if request.method == 'POST':
             form = addUserForm([], request.POST)
