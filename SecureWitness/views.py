@@ -14,6 +14,7 @@ from Crypto.PublicKey import RSA
 from Crypto import Random
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import logout
 
 #put forms in forms.py later
 from django import forms
@@ -64,11 +65,17 @@ def login(request):
             users = user.objects.filter(username=u).filter(password=pw)
             if(form.cleaned_data['Register']):
                 if(len(user.objects.filter(username=u)) > 0):
-                    return HttpResponse('username already taken')
+                    return render(request, 'SecureWitness/login.html', {
+                        'alreadytaken' : True,
+                        'form' : loginForm(),
+                    })
                 else:
                     newuser = user(username=u, password=pw)
                     newuser.save()
-                    return HttpResponse("new user created successfully")
+                    return render(request, 'SecureWitness/login.html', {
+                        'newuser' : True,
+                        'form' : loginForm(),
+                    })
             elif(len(users) > 0):
                 request.session['u'] = u
                 if users[0].adminStatus == 1:
@@ -79,11 +86,20 @@ def login(request):
                 else:
                     return render(request, 'SecureWitness/userhome.html', {'u' : u})
             else:
-                return HttpResponse("unsuccessful login")
+                return render(request, 'SecureWitness/login.html', {
+                    'nosuccess' : True,
+                    'form' : loginForm(),
+                })
+
     # if a GET (or any other method) we'll create a blank form
     else:
         form = loginForm()
     return render(request, 'SecureWitness/login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    form = loginForm()
+    return render(request, 'SecureWitness/homepage.html')
 
 @csrf_exempt
 def login_decrypt(request):
@@ -457,7 +473,61 @@ def viewReport(request, desc=""):
          return HttpResponse("You are not logged in")
 
 def viewAvailableReports(request):
-    return HttpResponse("HI")
+    if 'u' in request.session:
+        name = request.session['u']
+        u = user.objects.filter(username=name)[0]
+        report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
+        folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+
+        groups = group.objects.all()
+        group_list = []
+        for g in groups:
+            users = json.loads(g.users)
+            if request.session['u'] in users[g.groupName]:
+                group_list.append(g.groupName)
+
+        report_names = []
+
+        for g in group_list:
+            all_reports = report.objects.all()
+            for a_report in all_reports:
+                if g in a_report.group:
+                    #GET REPORT BY UNIQUE IDENTIFIERS
+                    report_names.append(a_report.shortdesc)
+
+        group_report_list = report.objects.filter(shortdesc__in=report_names)
+
+        report_list = report_list | group_report_list
+
+
+        folders = {}
+        for item in folder_list:
+            if item.folder not in folders:
+                folders[item.folder] = 1
+            else:
+                folders[item.folder] += 1
+
+        list = group.objects.all()
+        group_list = []
+        for g in list:
+            if name in g.users:
+                group_list.append(g.groupName)
+
+        template = loader.get_template('SecureWitness/availableReports.html')
+        context = RequestContext(request, {
+            'report_list': report_list,
+            'user' : request.session['u'],
+            'folder_list' : folders,
+            'group_list' : group_list,
+        })
+        return render(request, 'SecureWitness/availableReports.html', {
+            'report_list': report_list,
+            'user' : request.session['u'],
+            'folder_list' : folders,
+            'group_list' : group_list,
+        })
+    else:
+        return HttpResponse("You are not logged in")
 
 def deleteFolder(request, folder=""):
     if 'u' in request.session:
@@ -542,6 +612,7 @@ def addToGroupUser(request):
             form = addUserForm(group_list)
             return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True })
         else:
+            return HttpResponse(group_list)
             form = addUserForm(group_list)
             return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':False })
     else:
@@ -607,7 +678,10 @@ def addUserToGroup(request):
         for g in groups:
             users = json.loads(g.users)
             group_list.append(g.groupName)
-          
+         
+        if len(group_list) == 0:
+            return HttpResponse("There are no groups yet")
+
         if request.method == 'POST':
             form = addUserForm([], request.POST)
             if request.POST.get('username'):
