@@ -595,6 +595,7 @@ def addToGroupUser(request):
             form = addUserForm(group_list)
             return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True })
         else:
+            return HttpResponse(group_list)
             form = addUserForm(group_list)
             return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':False })
     else:
@@ -660,7 +661,10 @@ def addUserToGroup(request):
         for g in groups:
             users = json.loads(g.users)
             group_list.append(g.groupName)
-          
+         
+        if len(group_list) == 0:
+            return HttpResponse("There are no groups yet")
+
         if request.method == 'POST':
             form = addUserForm([], request.POST)
             if request.POST.get('username'):
