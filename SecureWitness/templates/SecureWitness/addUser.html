@@ -1,3 +1,6 @@
+<div style="position: relative">
+    <a href="/SecureWitness/homepage"><img style="position: fixed; top: 5px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
+</div>
 {% if ingroups %}
 <form action = '/SecureWitness/addUserToGroup/' method = 'POST'>
 	{% csrf_token %}
@@ -8,7 +11,6 @@
 </form>
 {% else %}
     You are not in any groups.<br/>
-    <a href="/SecureWitness/homepage/">Click here to return to homepage.</a>
 {% endif %}
 {% if admin %}
 <form action = '/SecureWitness/adminPage/' method = 'POST'>
