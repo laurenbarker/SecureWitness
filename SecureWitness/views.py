@@ -122,8 +122,29 @@ def viewFiles_decrypt(request):
         grp = grp + g
 
     #ob_list = report.objects.filter(reduce(lambda x, y: x | y, [Q(name__contains=word) for word in group_list]))
+    return HttpResponse(str(report_list) + grp)
+    #return HttpResponse(groups)
+
+@csrf_exempt
+def uploaded_key(request):
+    # get reports for user
+    name = request.POST.get('username')
+    u = user.objects.filter(username=name)[0]
+    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
+    groups = group.objects.all()
+    #create groups that have access to the report
+    group_list = []
+    for g in groups:
+        users = json.loads(g.users)
+        if u in users[g.groupName]:
+            group_list.append(g.groupName)
+    grp = ""
+    for g in group_list:
+        grp = grp + g
+
+    #ob_list = report.objects.filter(reduce(lambda x, y: x | y, [Q(name__contains=word) for word in group_list]))
     #return HttpResponse(str(report_list) + grp)
-    return HttpResponse(groups)
+    return HttpResponse("In progress...")
 
 def index(request):
     if 'u' in request.session:
@@ -170,9 +191,6 @@ def search(request):
         form = NameForm(request.POST)
         # check whether it's valid:
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
             loclist = []
             keylist = []
             desclist = []
@@ -241,22 +259,11 @@ def search(request):
                         if not authorization:
                             desclist.remove(item)
 
-
-            report_list = []
-            folders = {}
-            for item in desclist:
-                if not item.folder:
-                    report_list.append(item)
-                else:
-                    if item.folder not in folders:
-                        folders[item.folder] = 1
-                    else:
-                        folders[item.folder] += 1
             template = loader.get_template('SecureWitness/index.html')
             context = RequestContext(request, {
-                  'report_list': report_list,
-                  'folder_list': folders,
-                  'search' : 'yes'
+                  'report_list': desclist,
+                  'search' : 'yes',
+                  'user' : request.session['u'],
             })
             return HttpResponse(template.render(context))
     # if a GET (or any other method) we'll create a blank form
@@ -317,6 +324,9 @@ def upload(request):
                 for chunk in f.chunks():
                     enc_data = public_key.encrypt(chunk, 32)
                     myf.write(str.encode(str(enc_data)))
+
+
+                f = path
             else:
                 key = ""
             name = request.session['u']
@@ -551,9 +561,6 @@ def addToGroupUser(request):
             users = json.loads(g.users)
             if request.session['u'] in users[g.groupName]:
                 group_list.append(g.groupName)
-
-        if len(group_list) == 0:
-            return HttpResponse("You are not in any groups")
           
         if request.method == 'POST':
             form = addUserForm([], request.POST)
@@ -584,9 +591,12 @@ def addToGroupUser(request):
 
             else:
                 return HttpResponse("Please enter a username")
+        elif len(group_list) > 0:
+            form = addUserForm(group_list)
+            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True })
         else:
             form = addUserForm(group_list)
-            return render(request, 'SecureWitness/addUser.html', {'form' : form })
+            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':False })
     else:
         return HttpResponse("You are not logged in")
 
