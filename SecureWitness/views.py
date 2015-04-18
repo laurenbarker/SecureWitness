@@ -310,6 +310,7 @@ def upload(request):
                 # public/private key pair
                 random_generator = Random.new().read
                 key = RSA.generate(1024, random_generator)
+                pkey = key.exportKey('PEM')
 
                 # encrypt
                 public_key = key.publickey()
@@ -328,10 +329,10 @@ def upload(request):
 
                 f = path
             else:
-                key = ""
+                pkey = ""
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = None, key = key, group = group_access)
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = None, key = pkey, group = group_access)
             if f:
                 rep.f = myf
             rep.save()
