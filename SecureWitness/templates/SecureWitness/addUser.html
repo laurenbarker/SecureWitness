@@ -1,7 +1,7 @@
 <div style="position: relative">
     <a href="/SecureWitness/homepage"><img style="position: fixed; top: 5px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
 </div>
-{% if ingroups %}
+{% if ingroup %}
 <form action = '/SecureWitness/addUserToGroup/' method = 'POST'>
 	{% csrf_token %}
 	<table align="left">
