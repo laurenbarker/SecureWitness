@@ -446,7 +446,61 @@ def viewReport(request, desc=""):
          return HttpResponse("You are not logged in")
 
 def viewAvailableReports(request):
-    return HttpResponse("HI")
+    if 'u' in request.session:
+        name = request.session['u']
+        u = user.objects.filter(username=name)[0]
+        report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
+        folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+
+        groups = group.objects.all()
+        group_list = []
+        for g in groups:
+            users = json.loads(g.users)
+            if request.session['u'] in users[g.groupName]:
+                group_list.append(g.groupName)
+
+        report_names = []
+
+        for g in group_list:
+            all_reports = report.objects.all()
+            for a_report in all_reports:
+                if g in a_report.group:
+                    #GET REPORT BY UNIQUE IDENTIFIERS
+                    report_names.append(a_report.shortdesc)
+
+        group_report_list = report.objects.filter(shortdesc__in=report_names)
+
+        report_list = report_list | group_report_list
+
+
+        folders = {}
+        for item in folder_list:
+            if item.folder not in folders:
+                folders[item.folder] = 1
+            else:
+                folders[item.folder] += 1
+
+        list = group.objects.all()
+        group_list = []
+        for g in list:
+            if name in g.users:
+                group_list.append(g.groupName)
+
+        template = loader.get_template('SecureWitness/availableReports.html')
+        context = RequestContext(request, {
+            'report_list': report_list,
+            'user' : request.session['u'],
+            'folder_list' : folders,
+            'group_list' : group_list,
+        })
+        return render(request, 'SecureWitness/availableReports.html', {
+            'report_list': report_list,
+            'user' : request.session['u'],
+            'folder_list' : folders,
+            'group_list' : group_list,
+        })
+    else:
+        return HttpResponse("You are not logged in")
 
 def deleteFolder(request, folder=""):
     if 'u' in request.session:
