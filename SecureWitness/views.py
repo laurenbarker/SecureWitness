@@ -14,6 +14,7 @@ from Crypto.PublicKey import RSA
 from Crypto import Random
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import logout
 
 #put forms in forms.py later
 from django import forms
@@ -84,6 +85,11 @@ def login(request):
     else:
         form = loginForm()
     return render(request, 'SecureWitness/login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    form = loginForm()
+    return render(request, 'SecureWitness/homepage.html')
 
 @csrf_exempt
 def login_decrypt(request):

@@ -26,4 +26,5 @@ urlpatterns = patterns('',
     url(r'^viewFiles_decrypt/$', views.viewFiles_decrypt, name = 'viewFiles_decrpyt'),
     url(r'^uploaded_key/$', views.uploaded_key, name = 'uploaded_key'),
     url(r'^viewAvailableReports/$', views.viewAvailableReports, name = 'viewAvailableReports'),
+    url(r'^logout/$', views.logout_view, name='logout'),
 )
