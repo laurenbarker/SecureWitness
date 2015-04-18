@@ -1,3 +1,9 @@
+ <script type="text/javascript">
+            {% if msg %}
+            alert('{{msg }}');
+            {% endif %}
+        </script>
+
 <form action = '/SecureWitness/changeUserSuspensionStatus/' method = 'POST'>
 	{% csrf_token %}
 	{{ form }}

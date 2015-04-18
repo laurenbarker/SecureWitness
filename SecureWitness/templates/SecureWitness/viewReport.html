@@ -21,7 +21,7 @@
 <b>Viewing Report: {{report.shortdesc}}</b>
     <br/>
     <table border="1">
-        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>Private</td><td>File</td><td>Delete</td></tr>
+        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>Private</td><td>File</td><td>Delete</td><td>Folder</td></tr>
         <tr>
             <td>{{report.author}}</td>
             <td>{{report.shortdesc }}</td>
@@ -35,6 +35,8 @@
             {% else %}
             <td>No File</td>
             {% endif %}
+            <td></td>
+            <td>{{ report.folder }}</td>
         </tr>
         <tr>
             <form method="POST"enctype=multipart/form-data action="/SecureWitness/viewReport/{{report.shortdesc}}">
@@ -48,6 +50,7 @@
             <td>{{form.private}}</td>
             <td>{{form.file}}</td>
             <td><input type="submit" value = "Delete" name="del"></td>
+            <td>{{ form.folder }}</td>
             </form>
         </tr>
 
