@@ -18,9 +18,11 @@ from django.contrib.auth import logout
 
 #put forms in forms.py later
 from django import forms
+from django.forms import PasswordInput
+
 class loginForm(forms.Form):
     username =  forms.CharField(max_length=50)
-    password =  forms.CharField(max_length=50)
+    password =  forms.CharField(max_length=50, widget=PasswordInput)
     Register = forms.BooleanField(required=False)
 
 class NameForm(forms.Form):
