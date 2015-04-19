@@ -33,7 +33,7 @@ file_enc = raw_input("Please enter the file you wish to decrypt: ")
 print ('Your input was' + " " + file_enc)
 
 # check if user has access via django server and get key to decrypt
-#r = requests.get('http://localhost:8000/SecureWitness/uploaded_key/' + file_enc)
+#r = requests.get('http://localhost:8000/SecureWitness/uploaded_key/', data=payload)
 #print r.text
 
 # gets file to decrpyt
