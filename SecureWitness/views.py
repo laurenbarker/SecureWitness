@@ -342,7 +342,7 @@ def upload(request):
 
                 for chunk in f.chunks():
                     enc_data = public_key.encrypt(chunk, 32)
-                    myf.write(str.encode(str(enc_data)))
+                    myf.write(enc_data[0])
 
 
                 f = path
