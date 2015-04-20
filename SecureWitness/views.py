@@ -624,16 +624,18 @@ def addToGroupUser(request):
                         theGroup = group.objects.get(groupName=g)
                         users = json.loads(theGroup.users)
 
-                        if username not in users[g]:
+                        if username not in users[g] and user.objects.filter(username=username).count() > 0:
                             users[g].append(username)
                             theGroup.users = json.dumps(users)
                             theGroup.save()
                             form = addUserForm(group_list)
                             return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User was successfully added', 'admin':False })
-                        else:
+                        elif username in users[g]:
                             form = addUserForm(group_list)
                             return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User is already in this group', 'admin':False })
-
+                        else:
+                            form = addUserForm(group_list)
+                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'Username does not exist', 'admin':False })
                         group_checked = True
 
                 if group_checked == False:
@@ -646,9 +648,7 @@ def addToGroupUser(request):
             form = addUserForm(group_list)
             return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'admin':False })
         else:
-            return HttpResponse(group_list)
-            form = addUserForm(group_list)
-            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':False, 'admin':False })
+            return render(request,'SecureWitness/userhome.html', { 'ingroup':False, 'admin':False, 'msg':"You are not a member of any groups." })
     else:
         return HttpResponse("You are not logged in")
 
@@ -717,7 +717,7 @@ def addUserToGroup(request):
             group_list.append(g.groupName)
          
         if len(group_list) == 0:
-            return HttpResponse("There are no groups yet")
+            return render(request, 'SecureWitness/adminPage.html', {'msg':'There are no groups yet.'})
 
         if request.method == 'POST':
             form = addUserForm([], request.POST)
