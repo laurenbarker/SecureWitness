@@ -126,6 +126,12 @@ def login_decrypt(request):
 def viewFiles_decrypt(request):
     # get reports for user
     name = request.POST.get('username')
+    #pw = request.POST.get('password')
+    # check and see if that user exists
+    #users = user.objects.filter(username=u).filter(password=pw)
+    #if(len(users) <= 0):
+        #return HttpResponse("unsuccessful authentication")
+
     u = user.objects.filter(username=name)[0]
     report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
     groups = group.objects.all()
@@ -147,6 +153,12 @@ def viewFiles_decrypt(request):
 def uploaded_key(request):
     # get reports for user
     name = request.POST.get('username')
+    pw = request.POST.get('password')
+    # check and see if that user exists
+    users = user.objects.filter(username=u).filter(password=pw)
+    if(len(users) <= 0):
+        return HttpResponse("unsuccessful authentication")
+
     u = user.objects.filter(username=name)[0]
     report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
     groups = group.objects.all()

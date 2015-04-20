@@ -24,18 +24,30 @@ if r.text == "unsuccessful authentication" or r.text == 'Your account has been s
 	sys.exit(0)
 
 # display files that can be downloaded
-payload = {'username': usrnm}
+# TODO: add password parameter
+payload = {'username': usrnm, 'password': psswrd}
+#payload = {'username': usrnm}
 r = requests.post("http://localhost:8000/SecureWitness/viewFiles_decrypt/", data=payload)
 print "Reports you have submitted:"
 print(r.text)
+if r.text == "unsuccessful authentication":
+	print "Exiting application..."
+	sys.exit(0)
 
 # user enters file to decrypt 
+# TODO: add password parameter
 file_enc = raw_input("Please enter the file you wish to decrypt: ")
 print ('Your input was' + " " + file_enc)
 
+# TODO: add password parameter
+
+# payload = {'username': usrnm, 'password': psswrd, 'file': file_enc}
 # check if user has access via django server and get key to decrypt
 #r = requests.get('http://localhost:8000/SecureWitness/uploaded_key/', data=payload)
 #print r.text
+#if r.text == "unsuccessful authentication" or r.text == 'Your account has been suspended by an administrator':
+#	print "Exiting application..."
+#	sys.exit(0)
 
 # gets file to decrpyt
 r = requests.get('http://localhost:8000/SecureWitness/uploaded_files/' + file_enc)
