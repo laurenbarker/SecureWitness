@@ -269,7 +269,7 @@ def upload(request):
                 date = date[2] + "-" + date[0] + "-" + date[1]
             kwds = request.POST.get('keywords')
             priv = request.POST.get('private')
-            group_access = []
+            group_access = {}
             if priv is None:
                 priv = False
             else:
@@ -281,8 +281,8 @@ def upload(request):
                     if request.session['u'] in users[g.groupName]:
                         group_list.append(g.groupName)
                     permission = request.POST.get("Give access to " + g.groupName)
-                    if permission is not None:
-                        group_access.append(g.groupName)
+                    if permission:
+                        group_access[g.groupName] = True
 
             f = request.FILES.get('file')
             if f:
@@ -311,7 +311,8 @@ def upload(request):
             fold = request.POST.get('folder')
             if not fold:
                 fold = None
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = fold, key = key, group = group_access)
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = fold, key = key)
+            rep.group = json.dumps(group_access)
             if f:
                 rep.f = myf
             rep.save()
@@ -403,7 +404,6 @@ def viewReport(request, desc=""):
                     report_list.file = f
                 if fold:
                     report_list.folder = fold
-                report_list.save()
                 #get groups user is in
                 group_list = []
                 groups = group.objects.all()
@@ -411,7 +411,21 @@ def viewReport(request, desc=""):
                     users = json.loads(g.users)
                     if request.session['u'] in users[g.groupName]:
                         group_list.append(g.groupName)
-                form = UploadFileForm(group_list)
+
+                if priv:
+                    report_groups = json.loads(report_list.group)
+                    for g in group_list:
+                        info = request.POST.get(g)
+                        if info:
+                            if g not in report_groups:
+                                report_groups[g] = True
+                        else:
+                            if g in report_groups:
+                                del report_groups[g]
+                    report_list.group = json.dumps(report_groups)
+                else:
+                    report_list.group = json.dumps({})
+                report_list.save()
                 if short:
                     return HttpResponseRedirect( short)
                 else:
@@ -428,11 +442,20 @@ def viewReport(request, desc=""):
                 users = json.loads(g.users)
                 if request.session['u'] in users[g.groupName]:
                     group_list.append(g.groupName)
-            form = UploadFileForm()
+            report_groups = report_list.group
+            group_access = []
+            form = UploadFileForm(group_list)
+            group_dict = {}
+            for g in group_list:
+                if g in report_groups:
+                    group_dict[g] = True
+                else:
+                    group_dict[g] = False
             context = RequestContext(request, {
                     'report': report_list,
                     'user' : request.session['u'],
                     'form' : form,
+                    'groups' : group_dict
             })
             return HttpResponse(template.render(context))
     else:
