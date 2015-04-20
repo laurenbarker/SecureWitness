@@ -5,7 +5,7 @@ from Crypto import Random
 from os.path import expanduser
 import sys
 import requests
-from base64 import b64decode
+# TODO: add parameters to requests that check to see it you are logged in on the server side
 
 # enter username
 usrnm = raw_input("Please enter your Secure Witness username: ")
