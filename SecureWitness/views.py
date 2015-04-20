@@ -774,16 +774,23 @@ def changeUserSuspensionStatus(request):
                 try:
                     users = user.objects.get(username=username)
                     if 'suspend' in request.POST:
-                        users.suspensionStatus = 1
-                        users.save()
-                        form = suspendUserForm()
-                        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was suspended.", 'form' : form})
-
+                        if users.suspensionStatus == 0:
+                            users.suspensionStatus = 1
+                            users.save()
+                            form = suspendUserForm()
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was suspended.", 'form' : form})
+                        else:
+                            form = suspendUserForm
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User is already suspended.", 'form' : form})
                     else:
-                        users.suspensionStatus = 0
-                        users.save()
-                        form = suspendUserForm()
-                        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was unsuspended.", 'form' : form})
+                        if users.suspensionStatus == 1:
+                            users.suspensionStatus = 0
+                            users.save()
+                            form = suspendUserForm()
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was unsuspended.", 'form' : form})
+                        else:
+                            form = suspendUserForm()
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User is not suspended.", 'form' : form})
 
                 except:
                      form = suspendUserForm()
