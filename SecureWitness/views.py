@@ -544,6 +544,9 @@ def viewAvailableReports(request):
             if name in g.users:
                 group_list.append(g.groupName)
 
+        for reports in report_list:
+            reports.file.name = reports.file.name.split('/')[1]
+
         template = loader.get_template('SecureWitness/availableReports.html')
         context = RequestContext(request, {
             'report_list': report_list,
