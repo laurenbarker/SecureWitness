@@ -13,13 +13,18 @@
 <div style="position: relative">
     <a href="/SecureWitness/homepage"><img style="position: fixed; top: 5px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
 </div>
+    {% if admin %}
 <form action = '/SecureWitness/addUserToGroup/' method = 'POST'>
+{% else %}
+    <form action = '/SecureWitness/addToGroupUser/' method = 'POST'>
+{% endif %}
 	{% csrf_token %}
 	<table align="left">
     {{ form.as_p }}
     </table>
 	<input type = 'submit' value='Add User'>
 </form>
+
 {% else %}
     You are not in any groups.<br/>
 {% endif %}

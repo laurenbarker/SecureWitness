@@ -209,7 +209,7 @@ def index(request):
             'group_list' : group_list,
         })
     else:
-        return HttpResponse("You are not logged in")
+        return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 #search
 def search(request):
@@ -384,7 +384,7 @@ def upload(request):
         form = UploadFileForm(group_list)
         return render(request,'SecureWitness/upload.html', {'form': form})
     else:
-        return HttpResponse('You are not logged in')
+        return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def homepage(request):
     if 'u' in request.session:
@@ -411,7 +411,7 @@ def viewFolder(request, folder=""):
         })
         return HttpResponse(template.render(context))
     else:
-         return HttpResponse("You are not logged in")
+        return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def viewReport(request, desc=""):
     if 'u' in request.session:
@@ -513,7 +513,7 @@ def viewReport(request, desc=""):
             })
             return HttpResponse(template.render(context))
     else:
-         return HttpResponse("You are not logged in")
+        return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def viewAvailableReports(request):
     if 'u' in request.session:
@@ -556,6 +556,9 @@ def viewAvailableReports(request):
             if name in g.users:
                 group_list.append(g.groupName)
 
+        for reports in report_list:
+            reports.file.name = reports.file.name.split('/')[1]
+
         template = loader.get_template('SecureWitness/availableReports.html')
         context = RequestContext(request, {
             'report_list': report_list,
@@ -570,7 +573,7 @@ def viewAvailableReports(request):
             'group_list' : group_list,
         })
     else:
-        return HttpResponse("You are not logged in")
+        return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def deleteFolder(request, folder=""):
     if 'u' in request.session:
@@ -593,7 +596,7 @@ def deleteFolder(request, folder=""):
         })
         return HttpResponse(template.render(context))
     else:
-        return HttpResponse("You are not logged in")
+        return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def renameFolder(request, folder=""):
     if 'u' in request.session:
@@ -611,7 +614,7 @@ def renameFolder(request, folder=""):
         })
         return HttpResponse(template.render(context))
     else:
-        return HttpResponse("You are not logged in")
+            return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def addToGroupUser(request):
     if 'u' in request.session:
@@ -636,34 +639,33 @@ def addToGroupUser(request):
                         theGroup = group.objects.get(groupName=g)
                         users = json.loads(theGroup.users)
 
-                        if username not in users[g]:
+                        if username not in users[g] and user.objects.filter(username=username).count() > 0:
                             users[g].append(username)
                             theGroup.users = json.dumps(users)
                             theGroup.save()
                             form = addUserForm(group_list)
-                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User was successfully added' })
+                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User was successfully added', 'admin':False })
+                        elif username in users[g]:
+                            form = addUserForm(group_list)
+                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User is already in this group', 'admin':False })
                         else:
                             form = addUserForm(group_list)
-                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User is already in this group' })
-
+                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'Username does not exist', 'admin':False })
                         group_checked = True
 
                 if group_checked == False:
                     form = addUserForm(group_list)
-                    return render(request, 'SecureWitness/addUser.html', {'msg': 'Please check at least 1 group.','form' : form, 'ingroup' : True })
-
+                    return render(request, 'SecureWitness/addUser.html', {'msg': 'Please check at least 1 group.','form' : form, 'ingroup' : True, 'admin':False })
             else:
                 form = addUserForm(group_list)
-                return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'Please enter a username' })
+                return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'Please enter a username', 'admin':False })
         elif len(group_list) > 0:
             form = addUserForm(group_list)
-            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True })
+            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'admin':False })
         else:
-            return HttpResponse(group_list)
-            form = addUserForm(group_list)
-            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':False })
+            return render(request,'SecureWitness/userhome.html', { 'ingroup':False, 'admin':False, 'msg':"You are not a member of any groups." })
     else:
-        return HttpResponse("You are not logged in")
+            return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def adminPage(request):
     if 'u' in request.session:
@@ -672,7 +674,7 @@ def adminPage(request):
         else:
             return HttpResponse("You are not an admin")
     else:
-        return HttpResponse("You are not logged in")
+            return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def giveAdminAccess(request):
     if 'u' in request.session:
@@ -683,10 +685,13 @@ def giveAdminAccess(request):
 
                 try:
                     users = user.objects.get(username=name)
-                    users.adminStatus = 1
-                    users.save()
-                    form = GiveAdminAccessForm()
-                    return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':'User was given admin access' })
+                    if users.adminStatus == 0: 
+                        users.adminStatus = 1
+                        users.save()
+                        form = GiveAdminAccessForm()
+                        return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':'User was given admin access' })
+                    else:
+                        return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg' : "User already has admin access"})
                 except:
                     form = GiveAdminAccessForm()
                     return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':"User does not exist" })
@@ -698,7 +703,7 @@ def giveAdminAccess(request):
             form = GiveAdminAccessForm()
             return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form })
     else:
-        return HttpResponse("You are not logged in")
+            return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def makeGroup(request):
     if 'u' in request.session:
@@ -707,18 +712,20 @@ def makeGroup(request):
             if form.is_valid():
                 name = form.cleaned_data['groupName']
                 if group.objects.filter(groupName = name).exists():
-                    return HttpResponse("Group already exists")
+                    form = CreateGroupForm()
+                    return render(request, 'SecureWitness/createGroup.html', { 'form' : form, 'msg':'Group already exists' } )
                 else:
                     users = {}
                     users[name] = []
                     myGroup = group(groupName = name, users = json.dumps(users))
                     myGroup.save()
-                    return HttpResponse("Group was successfully created!")
+                    form = CreateGroupForm()
+                    return render(request, 'SecureWitness/createGroup.html', { 'form' : form, 'msg':'Group was successfully created!' } )
         else:
             form = CreateGroupForm()
             return render(request, 'SecureWitness/createGroup.html', { 'form' : form } )
     else:
-        return HttpResponse("You are not logged in")
+            return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 
 def addUserToGroup(request):
@@ -730,7 +737,7 @@ def addUserToGroup(request):
             group_list.append(g.groupName)
          
         if len(group_list) == 0:
-            return HttpResponse("There are no groups yet")
+            return render(request, 'SecureWitness/adminPage.html', {'msg':'There are no groups yet.'})
 
         if request.method == 'POST':
             form = addUserForm([], request.POST)
@@ -751,26 +758,26 @@ def addUserToGroup(request):
                             theGroup.users = json.dumps(users)
                             theGroup.save()
                             form = addUserForm(group_list)
-                            return render(request, 'SecureWitness/addUser.html', {'msg': "User was successfully added.", 'form': form, 'ingroup': True})
+                            return render(request, 'SecureWitness/addUser.html', {'msg': "User was successfully added.", 'form': form, 'ingroup': True, 'admin':True})
                         else:
                             form = addUserForm(group_list)
-                            return render(request, 'SecureWitness/adduser.html', {'msg': "User is already in this group.", 'form' : form, 'ingroup': True})
+                            return render(request, 'SecureWitness/adduser.html', {'msg': "User is already in this group.", 'form' : form, 'ingroup': True, 'admin':True})
 
                         group_checked = True
 
                 if group_checked == False:
                      form = addUserForm(group_list)
-                     return render(request, 'SecureWitness/adduser.html', {'msg': "Please check at least one group.", 'form' : form, 'ingroup': True})
+                     return render(request, 'SecureWitness/adduser.html', {'msg': "Please check at least one group.", 'form' : form, 'ingroup': True, 'admin':True})
 
             else:
                  form = addUserForm(group_list)
-                 return render(request, 'SecureWitness/adduser.html', {'msg': "Please enter a username.", 'form' : form, 'ingroup': True})
+                 return render(request, 'SecureWitness/adduser.html', {'msg': "Please enter a username.", 'form' : form, 'ingroup': True, 'admin':True})
 
         else:
             form = addUserForm(group_list)
-            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':True })
+            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':True, 'admin':True })
     else:
-        return HttpResponse("You are not logged in")
+            return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def changeUserSuspensionStatus(request):
     if 'u' in request.session:
@@ -781,16 +788,23 @@ def changeUserSuspensionStatus(request):
                 try:
                     users = user.objects.get(username=username)
                     if 'suspend' in request.POST:
-                        users.suspensionStatus = 1
-                        users.save()
-                        form = suspendUserForm()
-                        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was suspended.", 'form' : form})
-
+                        if users.suspensionStatus == 0:
+                            users.suspensionStatus = 1
+                            users.save()
+                            form = suspendUserForm()
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was suspended.", 'form' : form})
+                        else:
+                            form = suspendUserForm
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User is already suspended.", 'form' : form})
                     else:
-                        users.suspensionStatus = 0
-                        users.save()
-                        form = suspendUserForm()
-                        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was unsuspended.", 'form' : form})
+                        if users.suspensionStatus == 1:
+                            users.suspensionStatus = 0
+                            users.save()
+                            form = suspendUserForm()
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was unsuspended.", 'form' : form})
+                        else:
+                            form = suspendUserForm()
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User is not suspended.", 'form' : form})
 
                 except:
                      form = suspendUserForm()
@@ -804,7 +818,7 @@ def changeUserSuspensionStatus(request):
             form = suspendUserForm()
             return render(request, 'SecureWitness/changeUserSuspensionStatus.html', { 'form' : form })
     else:
-        return HttpResponse("You are not logged in")
+            return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
 def deleteReport(request):
     if 'u' in request.session:
@@ -826,4 +840,4 @@ def deleteReport(request):
             form = deleteReportForm()
             return render(request, 'SecureWitness/deleteReport.html', { 'form' : form })
     else:
-        return HttpResponse("You are not logged in")
+            return render(request, 'SecureWitness/login.html', {'form' : loginForm()})

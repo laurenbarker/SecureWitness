@@ -19,22 +19,21 @@
 <br/>
     Reports you can see that are not in folders
     <table border="1">
-        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>File</td><td>Modify</td></tr>
+        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>File</td></tr>
     {% for report in report_list %}
         <tr>
             {% if not report.folder %}
-            <td>{{report.author}}</td>
-            <td>{{report.shortdesc }}</td>
-            <td>{{report.longdesc}}</td>
-            <td>{{report.location}}</td>
-            <td>{{report.keywords}}</td>
-            <td>{{report.incident_date}}</td>
-            {% if report.file %}
-            <td><a href = '{{report.file.url}}'>File </a></td>
-            {% else %}
-            <td>No File</td>
-            {% endif %}
-            <td><a href="/SecureWitness/viewReport/{{report.shortdesc}}">Modify</a></td>
+                <td>{{report.author}}</td>
+                <td>{{report.shortdesc }}</td>
+                <td>{{report.longdesc}}</td>
+                <td>{{report.location}}</td>
+                <td>{{report.keywords}}</td>
+                <td>{{report.incident_date}}</td>
+                {% if report.file %}
+                    <td> {{ report.file.name }}</td>
+                    {% else %}
+                    <td>No File</td>
+                {% endif %}
             {% endif %}
         </tr>
     {% endfor %}
