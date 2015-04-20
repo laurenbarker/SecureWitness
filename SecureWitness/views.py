@@ -629,27 +629,26 @@ def addToGroupUser(request):
                             theGroup.users = json.dumps(users)
                             theGroup.save()
                             form = addUserForm(group_list)
-                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User was successfully added' })
+                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User was successfully added', 'admin':False })
                         else:
                             form = addUserForm(group_list)
-                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User is already in this group' })
+                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User is already in this group', 'admin':False })
 
                         group_checked = True
 
                 if group_checked == False:
                     form = addUserForm(group_list)
-                    return render(request, 'SecureWitness/addUser.html', {'msg': 'Please check at least 1 group.','form' : form, 'ingroup' : True })
-
+                    return render(request, 'SecureWitness/addUser.html', {'msg': 'Please check at least 1 group.','form' : form, 'ingroup' : True, 'admin':False })
             else:
                 form = addUserForm(group_list)
-                return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'Please enter a username' })
+                return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'Please enter a username', 'admin':False })
         elif len(group_list) > 0:
             form = addUserForm(group_list)
-            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True })
+            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'admin':False })
         else:
             return HttpResponse(group_list)
             form = addUserForm(group_list)
-            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':False })
+            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':False, 'admin':False })
     else:
         return HttpResponse("You are not logged in")
 
@@ -739,24 +738,24 @@ def addUserToGroup(request):
                             theGroup.users = json.dumps(users)
                             theGroup.save()
                             form = addUserForm(group_list)
-                            return render(request, 'SecureWitness/addUser.html', {'msg': "User was successfully added.", 'form': form, 'ingroup': True})
+                            return render(request, 'SecureWitness/addUser.html', {'msg': "User was successfully added.", 'form': form, 'ingroup': True, 'admin':True})
                         else:
                             form = addUserForm(group_list)
-                            return render(request, 'SecureWitness/adduser.html', {'msg': "User is already in this group.", 'form' : form, 'ingroup': True})
+                            return render(request, 'SecureWitness/adduser.html', {'msg': "User is already in this group.", 'form' : form, 'ingroup': True, 'admin':True})
 
                         group_checked = True
 
                 if group_checked == False:
                      form = addUserForm(group_list)
-                     return render(request, 'SecureWitness/adduser.html', {'msg': "Please check at least one group.", 'form' : form, 'ingroup': True})
+                     return render(request, 'SecureWitness/adduser.html', {'msg': "Please check at least one group.", 'form' : form, 'ingroup': True, 'admin':True})
 
             else:
                  form = addUserForm(group_list)
-                 return render(request, 'SecureWitness/adduser.html', {'msg': "Please enter a username.", 'form' : form, 'ingroup': True})
+                 return render(request, 'SecureWitness/adduser.html', {'msg': "Please enter a username.", 'form' : form, 'ingroup': True, 'admin':True})
 
         else:
             form = addUserForm(group_list)
-            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':True })
+            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':True, 'admin':True })
     else:
         return HttpResponse("You are not logged in")
 
