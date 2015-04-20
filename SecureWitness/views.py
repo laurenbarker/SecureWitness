@@ -671,10 +671,13 @@ def giveAdminAccess(request):
 
                 try:
                     users = user.objects.get(username=name)
-                    users.adminStatus = 1
-                    users.save()
-                    form = GiveAdminAccessForm()
-                    return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':'User was given admin access' })
+                    if users.adminStatus == 0: 
+                        users.adminStatus = 1
+                        users.save()
+                        form = GiveAdminAccessForm()
+                        return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':'User was given admin access' })
+                    else:
+                        return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg' : "User already has admin access"})
                 except:
                     form = GiveAdminAccessForm()
                     return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':"User does not exist" })
