@@ -544,6 +544,9 @@ def viewAvailableReports(request):
             if name in g.users:
                 group_list.append(g.groupName)
 
+        for reports in report_list:
+            reports.file.name = reports.file.name.split('/')[1]
+
         template = loader.get_template('SecureWitness/availableReports.html')
         context = RequestContext(request, {
             'report_list': report_list,
@@ -670,10 +673,13 @@ def giveAdminAccess(request):
 
                 try:
                     users = user.objects.get(username=name)
-                    users.adminStatus = 1
-                    users.save()
-                    form = GiveAdminAccessForm()
-                    return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':'User was given admin access' })
+                    if users.adminStatus == 0: 
+                        users.adminStatus = 1
+                        users.save()
+                        form = GiveAdminAccessForm()
+                        return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':'User was given admin access' })
+                    else:
+                        return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg' : "User already has admin access"})
                 except:
                     form = GiveAdminAccessForm()
                     return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':"User does not exist" })
@@ -770,16 +776,23 @@ def changeUserSuspensionStatus(request):
                 try:
                     users = user.objects.get(username=username)
                     if 'suspend' in request.POST:
-                        users.suspensionStatus = 1
-                        users.save()
-                        form = suspendUserForm()
-                        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was suspended.", 'form' : form})
-
+                        if users.suspensionStatus == 0:
+                            users.suspensionStatus = 1
+                            users.save()
+                            form = suspendUserForm()
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was suspended.", 'form' : form})
+                        else:
+                            form = suspendUserForm
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User is already suspended.", 'form' : form})
                     else:
-                        users.suspensionStatus = 0
-                        users.save()
-                        form = suspendUserForm()
-                        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was unsuspended.", 'form' : form})
+                        if users.suspensionStatus == 1:
+                            users.suspensionStatus = 0
+                            users.save()
+                            form = suspendUserForm()
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was unsuspended.", 'form' : form})
+                        else:
+                            form = suspendUserForm()
+                            return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User is not suspended.", 'form' : form})
 
                 except:
                      form = suspendUserForm()
