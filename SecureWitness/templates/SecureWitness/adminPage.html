@@ -9,6 +9,11 @@
 	<a href='/SecureWitness/deleteReport/'>Delete A Report </a> <br>
 
 <p> </p>
+        <script type="text/javascript">
+            {% if msg %}
+            alert('{{msg }}');
+            {% endif %}
+        </script>
 <form action = '/SecureWitness/homepage/' method = 'POST'>
 	{% csrf_token %}
 	<input type = 'submit' value = 'General Homepage'>

@@ -51,7 +51,7 @@ class UploadFileForm(forms.Form):
         super(UploadFileForm, self).__init__()
         for group in group_list:
             self.fields["Give access to " + group] = forms.BooleanField(required=False)
-
+    folder = forms.CharField(max_length=100, required=False)
 
 def login(request):
         # if this is a POST request we need to process the form data
@@ -308,7 +308,7 @@ def upload(request):
                 date = date[2] + "-" + date[0] + "-" + date[1]
             kwds = request.POST.get('keywords')
             priv = request.POST.get('private')
-            group_access = []
+            group_access = {}
             if priv is None:
                 priv = False
             else:
@@ -320,8 +320,8 @@ def upload(request):
                     if request.session['u'] in users[g.groupName]:
                         group_list.append(g.groupName)
                     permission = request.POST.get("Give access to " + g.groupName)
-                    if permission is not None:
-                        group_access.append(g.groupName)
+                    if permission:
+                        group_access[g.groupName] = True
 
             f = request.FILES.get('file')
             if f:
@@ -350,7 +350,11 @@ def upload(request):
                 pkey = ""
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = None, key = pkey, group = group_access)
+            fold = request.POST.get('folder')
+            if not fold:
+                fold = None
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = fold, key = pkey)
+            rep.group = json.dumps(group_access)
             if f:
                 rep.f = myf
             rep.save()
@@ -424,6 +428,7 @@ def viewReport(request, desc=""):
                 if priv is None:
                     priv = False
                 f = request.FILES.get('file')
+                fold = request.POST.get('folder')
                 name = request.session['u']
                 u = user.objects.filter(username=name)[0]
                 report_list = report.objects.filter(shortdesc=desc).filter(author=u)[0]
@@ -439,7 +444,8 @@ def viewReport(request, desc=""):
                 report_list.private = priv
                 if f:
                     report_list.file = f
-                report_list.save()
+                if fold:
+                    report_list.folder = fold
                 #get groups user is in
                 group_list = []
                 groups = group.objects.all()
@@ -447,7 +453,21 @@ def viewReport(request, desc=""):
                     users = json.loads(g.users)
                     if request.session['u'] in users[g.groupName]:
                         group_list.append(g.groupName)
-                form = UploadFileForm(group_list)
+
+                if priv:
+                    report_groups = json.loads(report_list.group)
+                    for g in group_list:
+                        info = request.POST.get(g)
+                        if info:
+                            if g not in report_groups:
+                                report_groups[g] = True
+                        else:
+                            if g in report_groups:
+                                del report_groups[g]
+                    report_list.group = json.dumps(report_groups)
+                else:
+                    report_list.group = json.dumps({})
+                report_list.save()
                 if short:
                     return HttpResponseRedirect( short)
                 else:
@@ -464,11 +484,20 @@ def viewReport(request, desc=""):
                 users = json.loads(g.users)
                 if request.session['u'] in users[g.groupName]:
                     group_list.append(g.groupName)
-            form = UploadFileForm()
+            report_groups = report_list.group
+            group_access = []
+            form = UploadFileForm(group_list)
+            group_dict = {}
+            for g in group_list:
+                if g in report_groups:
+                    group_dict[g] = True
+                else:
+                    group_dict[g] = False
             context = RequestContext(request, {
                     'report': report_list,
                     'user' : request.session['u'],
                     'form' : form,
+                    'groups' : group_dict
             })
             return HttpResponse(template.render(context))
     else:
@@ -599,17 +628,21 @@ def addToGroupUser(request):
                             users[g].append(username)
                             theGroup.users = json.dumps(users)
                             theGroup.save()
-                            return HttpResponse("User was successfully added")
+                            form = addUserForm(group_list)
+                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User was successfully added' })
                         else:
-                            return HttpResponse("User is already in this group")
+                            form = addUserForm(group_list)
+                            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'User is already in this group' })
 
                         group_checked = True
 
                 if group_checked == False:
-                    return HttpResponse("Please check at least 1 group")
+                    form = addUserForm(group_list)
+                    return render(request, 'SecureWitness/addUser.html', {'msg': 'Please check at least 1 group.','form' : form, 'ingroup' : True })
 
             else:
-                return HttpResponse("Please enter a username")
+                form = addUserForm(group_list)
+                return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True, 'msg':'Please enter a username' })
         elif len(group_list) > 0:
             form = addUserForm(group_list)
             return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup' : True })
@@ -640,12 +673,15 @@ def giveAdminAccess(request):
                     users = user.objects.get(username=name)
                     users.adminStatus = 1
                     users.save()
-                    return HttpResponse("User was given admin access")
+                    form = GiveAdminAccessForm()
+                    return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':'User was given admin access' })
                 except:
-                    return HttpResponse("User does not exist")
+                    form = GiveAdminAccessForm()
+                    return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':"User does not exist" })
 
             else:
-                return HttpResponse("Please enter a user")
+                form = GiveAdminAccessForm()
+                return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form, 'msg':'Please enter a user.' })
         else:
             form = GiveAdminAccessForm()
             return render(request, 'SecureWitness/giveAdminAccess.html', { 'form' : form })
@@ -702,19 +738,25 @@ def addUserToGroup(request):
                             users[g].append(username)
                             theGroup.users = json.dumps(users)
                             theGroup.save()
-                            return HttpResponse("User was successfully added")
+                            form = addUserForm(group_list)
+                            return render(request, 'SecureWitness/addUser.html', {'msg': "User was successfully added.", 'form': form, 'ingroup': True})
                         else:
-                            return HttpResponse("User is already in this group")
+                            form = addUserForm(group_list)
+                            return render(request, 'SecureWitness/adduser.html', {'msg': "User is already in this group.", 'form' : form, 'ingroup': True})
 
                         group_checked = True
 
                 if group_checked == False:
-                    return HttpResponse("Please check at least 1 group")
+                     form = addUserForm(group_list)
+                     return render(request, 'SecureWitness/adduser.html', {'msg': "Please check at least one group.", 'form' : form, 'ingroup': True})
+
             else:
-                return HttpResponse("Please enter a username")
+                 form = addUserForm(group_list)
+                 return render(request, 'SecureWitness/adduser.html', {'msg': "Please enter a username.", 'form' : form, 'ingroup': True})
+
         else:
             form = addUserForm(group_list)
-            return render(request, 'SecureWitness/addUser.html', {'form' : form })
+            return render(request, 'SecureWitness/addUser.html', {'form' : form, 'ingroup':True })
     else:
         return HttpResponse("You are not logged in")
 
@@ -729,15 +771,23 @@ def changeUserSuspensionStatus(request):
                     if 'suspend' in request.POST:
                         users.suspensionStatus = 1
                         users.save()
-                        return HttpResponse("User was suspended")
+                        form = suspendUserForm()
+                        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was suspended.", 'form' : form})
+
                     else:
                         users.suspensionStatus = 0
                         users.save()
-                        return HttpResponse("User was unsuspended")
+                        form = suspendUserForm()
+                        return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User was unsuspended.", 'form' : form})
+
                 except:
-                    return HttpResponse("User does not exist")
+                     form = suspendUserForm()
+                     return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "User does not exist.", 'form' : form})
+
             else:
-                return HttpResponse("Please enter a username")
+                 form = suspendUserForm()
+                 return render(request, 'SecureWitness/changeUserSuspensionStatus.html', {'msg': "Please enter a username.", 'form' : form})
+
         else:
             form = suspendUserForm()
             return render(request, 'SecureWitness/changeUserSuspensionStatus.html', { 'form' : form })
@@ -752,11 +802,14 @@ def deleteReport(request):
                 shortdesc = form.cleaned_data['shortdesc'].strip()
                 try:
                     someReport = report.objects.get(shortdesc=shortdesc).delete()
-                    return HttpResponse("Report has been deleted!")
+                    form = deleteReportForm()
+                    return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, "msg":"Report has been deleted" })
                 except:
-                    return HttpResponse("Report with given shortdesc does not exist!")
+                    form = deleteReportForm()
+                    return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, 'msg':"Report with given shortdesc does not exist" })
             else:
-                return HttpResponse("Please enter a shortdesc")
+                form = deleteReportForm()
+                return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, 'msg':"Please enter a shortdesc" })
         else:
             form = deleteReportForm()
             return render(request, 'SecureWitness/deleteReport.html', { 'form' : form })

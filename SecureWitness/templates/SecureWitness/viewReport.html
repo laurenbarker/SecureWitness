@@ -20,8 +20,10 @@
 {% if report %}
 <b>Viewing Report: {{report.shortdesc}}</b>
     <br/>
+      <form method="POST"enctype=multipart/form-data action="/SecureWitness/viewReport/{{report.shortdesc}}">
+            {% csrf_token %}
     <table border="1">
-        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>Private</td><td>File</td><td>Delete</td></tr>
+        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>Private</td><td>File</td><td>Delete</td><td>Folder</td></tr>
         <tr>
             <td>{{report.author}}</td>
             <td>{{report.shortdesc }}</td>
@@ -35,10 +37,10 @@
             {% else %}
             <td>No File</td>
             {% endif %}
+            <td></td>
+            <td>{{ report.folder }}</td>
         </tr>
         <tr>
-            <form method="POST"enctype=multipart/form-data action="/SecureWitness/viewReport/{{report.shortdesc}}">
-            {% csrf_token %}
                 <td><input type="submit" value="Change Report Data" ></td>
            <td> {{ form.shortdesc }}</td>
             <td> {{ form.longdesc }}</td>
@@ -48,10 +50,21 @@
             <td>{{form.private}}</td>
             <td>{{form.file}}</td>
             <td><input type="submit" value = "Delete" name="del"></td>
-            </form>
+            <td>{{ form.folder }}</td>
         </tr>
-
     </table>
+      {% if groups %}
+          Access status for each of your groups.<br/>
+          {% for key,value in groups.items %}
+              {% if value %}
+              {{ key }}:<input type="checkbox" value = "{{ key }}" name = "{{ key }}" checked>
+              {% else %}
+                 {{ key }}: <input type="checkbox" value = "{{ key }}" name = "{{ key }}">
+              {% endif %}
+              <br/>
+          {% endfor %}
+          {% endif %}
+    </form>
 {% else %}
 The report has been deleted. Select an option to return to another page.<br/>
 {% endif %}
