@@ -233,6 +233,7 @@ def uploaded_key(request):
     u = request.POST.get('username')
     pw = request.POST.get('password')
     rpt = request.POST.get('report')
+    fn = request.POST.get('file')
     # check and see if that user exists
     users = user.objects.filter(username=u).filter(password=pw)
     if(len(users) <= 0):
@@ -278,6 +279,8 @@ def uploaded_key(request):
         if str(reports) == str(frp):
             reports.file.name = reports.file.name.split('/')[1]
             frp = reports.file.name
+            if str(frp) != fn:
+                return HttpResponse("Invalid file name.")
             ky = reports.key
             break
 
