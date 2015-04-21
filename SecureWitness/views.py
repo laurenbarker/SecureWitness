@@ -125,14 +125,14 @@ def login_decrypt(request):
 @csrf_exempt
 def viewFiles_decrypt(request):
     # get reports for user
-    name = request.POST.get('username')
-    #pw = request.POST.get('password')
+    u = request.POST.get('username')
+    pw = request.POST.get('password')
     # check and see if that user exists
-    #users = user.objects.filter(username=u).filter(password=pw)
-    #if(len(users) <= 0):
-        #return HttpResponse("unsuccessful authentication")
+    users = user.objects.filter(username=u).filter(password=pw)
+    if(len(users) <= 0):
+        return HttpResponse("unsuccessful authentication")
 
-    u = user.objects.filter(username=name)[0]
+    u = user.objects.filter(username=u)[0]
     report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
     groups = group.objects.all()
     #create groups that have access to the report
@@ -152,14 +152,14 @@ def viewFiles_decrypt(request):
 @csrf_exempt
 def uploaded_key(request):
     # get reports for user
-    name = request.POST.get('username')
+    u = request.POST.get('username')
     pw = request.POST.get('password')
     # check and see if that user exists
     users = user.objects.filter(username=u).filter(password=pw)
     if(len(users) <= 0):
         return HttpResponse("unsuccessful authentication")
 
-    u = user.objects.filter(username=name)[0]
+    u = user.objects.filter(username=u)[0]
     report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
     groups = group.objects.all()
     #create groups that have access to the report
