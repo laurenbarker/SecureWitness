@@ -161,7 +161,7 @@ def viewReports_decrypt(request):
         grp = grp + str(g)
 
     #ob_list = report.objects.filter(reduce(lambda x, y: x | y, [Q(name__contains=word) for word in group_list]))
-    return HttpResponse(str(report_list) + grp + '\n')
+    return HttpResponse(str(report_list) + '\n')
     #return HttpResponse(groups)
 
 @csrf_exempt

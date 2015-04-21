@@ -6,7 +6,7 @@ from os.path import expanduser
 import sys
 import requests
 import getpass
-# TODO: add parameters to requests that check to see it you are logged in on the server side
+from os.path import expanduser
 
 # enter username
 usrnm = raw_input("Please enter your Secure Witness username: ")
@@ -46,7 +46,8 @@ if r.text == "unsuccessful authentication":
 # user enters file to decrypt 
 # TODO: add password parameter
 file_enc = raw_input("Please enter the file you wish to decrypt: ")
-print ('Your input was' + " " + file_enc)
+#print ('Your input was' + " " + file_enc)
+print ""
 
 # check if user has access via django server and get key to decrypt
 payload = {'username': usrnm, 'password': psswrd, 'report': rpt, 'file': file_enc}
@@ -59,14 +60,19 @@ key = RSA.importKey(r.text)
 
 # gets file to decrpyt
 r = requests.get('http://localhost:8000/SecureWitness/uploaded_files/' + file_enc)
-#r = requests.get('http://localhost:8000/SecureWitness/login')
 enc_data = r.content
 
 # decrypt 
-
-#print key
-print key.decrypt(enc_data) 
-
+# print decrypted file contents
+decrypted = key.decrypt(enc_data) 
+#print decrypted
 
 # write back descrypted to file
+downloads_dir = expanduser("~/Downloads/") + file_enc
+
+newFile = open(downloads_dir, 'w')
+newFile.write(decrypted)
+newFile.close()
+
+print "File downloaded to '" + downloads_dir + "'"
 
