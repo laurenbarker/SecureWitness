@@ -67,3 +67,6 @@ migrations
 
 # idea file
 .idea
+
+# staticfiles according to heroku
+staticfiles
