@@ -118,12 +118,12 @@ def login_decrypt(request):
         elif users[0].suspensionStatus == 1:
             return HttpResponse('Your account has been suspended by an administrator')
         else:
-            return HttpResponse('Authentication succeeded.')
+            return HttpResponse('Authentication succeeded.' + '\n')
     else:
         return HttpResponse("unsuccessful authentication")
 
 @csrf_exempt
-def viewFiles_decrypt(request):
+def viewReports_decrypt(request):
     # get reports for user
     u = request.POST.get('username')
     pw = request.POST.get('password')
@@ -133,20 +133,98 @@ def viewFiles_decrypt(request):
         return HttpResponse("unsuccessful authentication")
 
     u = user.objects.filter(username=u)[0]
-    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
+    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
+    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+
     groups = group.objects.all()
-    #create groups that have access to the report
     group_list = []
     for g in groups:
         users = json.loads(g.users)
         if u in users[g.groupName]:
             group_list.append(g.groupName)
+
+    report_names = []
+
+    for g in group_list:
+        all_reports = report.objects.all()
+        for a_report in all_reports:
+            if g in a_report.group:
+                #GET REPORT BY UNIQUE IDENTIFIERS
+                report_names.append(a_report.shortdesc)
+
+        group_report_list = report.objects.filter(shortdesc__in=report_names)
+
+        report_list = report_list | group_report_list
+  
     grp = ""
     for g in group_list:
-        grp = grp + g
+        grp = grp + str(g)
 
     #ob_list = report.objects.filter(reduce(lambda x, y: x | y, [Q(name__contains=word) for word in group_list]))
-    return HttpResponse(str(report_list) + grp)
+    return HttpResponse(str(report_list) + grp + '\n')
+    #return HttpResponse(groups)
+
+@csrf_exempt
+def viewFiles_decrypt(request):
+    # get reports for user
+    u = request.POST.get('username')
+    pw = request.POST.get('password')
+    rpt = request.POST.get('report')
+    # check and see if that user exists
+    users = user.objects.filter(username=u).filter(password=pw)
+    if(len(users) <= 0):
+        return HttpResponse("unsuccessful authentication")
+
+    u = user.objects.filter(username=u)[0]
+    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
+    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+
+    groups = group.objects.all()
+    group_list = []
+    for g in groups:
+        users = json.loads(g.users)
+        if u in users[g.groupName]:
+            group_list.append(g.groupName)
+
+    report_names = []
+
+    for g in group_list:
+        all_reports = report.objects.all()
+        for a_report in all_reports:
+            if g in a_report.group:
+                #GET REPORT BY UNIQUE IDENTIFIERS
+                report_names.append(a_report.shortdesc)
+
+        group_report_list = report.objects.filter(shortdesc__in=report_names)
+
+        report_list = report_list | group_report_list
+  
+    rp = ""
+    frp = ""
+    for r in report_list:
+        #rp += str(r)
+        if str(r) == str(rpt):
+            rp = 'found'
+            frp = r
+            break
+
+    if rp != 'found':
+        return HttpResponse('Report not found.')
+
+    for reports in report_list:
+        if str(reports) == str(frp):
+            reports.file.name = reports.file.name.split('/')[1]
+            frp = reports.file.name
+            shrt = reports.shortdesc
+            lng = reports.longdesc
+            loc = reports.location
+            kwds = reports.keywords
+            date = reports.incident_date
+            auth = reports.author
+            break
+
+    
+    return HttpResponse(str(rpt) + '\t' + str(auth) + '\t' + str(shrt) + '\t' + str(lng) + '\t' + str(loc) + '\t' + str(kwds) + '\t' + str(date) + '\t' + str(frp) + '\n')
     #return HttpResponse(groups)
 
 @csrf_exempt
@@ -154,27 +232,58 @@ def uploaded_key(request):
     # get reports for user
     u = request.POST.get('username')
     pw = request.POST.get('password')
+    rpt = request.POST.get('report')
     # check and see if that user exists
     users = user.objects.filter(username=u).filter(password=pw)
     if(len(users) <= 0):
         return HttpResponse("unsuccessful authentication")
 
     u = user.objects.filter(username=u)[0]
-    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")))
+    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
+    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+
     groups = group.objects.all()
-    #create groups that have access to the report
     group_list = []
     for g in groups:
         users = json.loads(g.users)
         if u in users[g.groupName]:
             group_list.append(g.groupName)
-    grp = ""
-    for g in group_list:
-        grp = grp + g
 
-    #ob_list = report.objects.filter(reduce(lambda x, y: x | y, [Q(name__contains=word) for word in group_list]))
-    #return HttpResponse(str(report_list) + grp)
-    return HttpResponse("In progress...")
+    report_names = []
+
+    for g in group_list:
+        all_reports = report.objects.all()
+        for a_report in all_reports:
+            if g in a_report.group:
+                #GET REPORT BY UNIQUE IDENTIFIERS
+                report_names.append(a_report.shortdesc)
+
+        group_report_list = report.objects.filter(shortdesc__in=report_names)
+
+        report_list = report_list | group_report_list
+  
+    rp = ""
+    frp = ""
+    for r in report_list:
+        #rp += str(r)
+        if str(r) == str(rpt):
+            rp = 'found'
+            frp = r
+            break
+
+    if rp != 'found':
+        return HttpResponse('Report not found.')
+
+    for reports in report_list:
+        if str(reports) == str(frp):
+            reports.file.name = reports.file.name.split('/')[1]
+            frp = reports.file.name
+            ky = reports.key
+            break
+
+    
+    return HttpResponse(str(ky))
+    #return HttpResponse("In progress...")
 
 def index(request):
     if 'u' in request.session:
