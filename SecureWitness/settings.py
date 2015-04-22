@@ -1,5 +1,5 @@
 """
-Django settings for forms project.
+Django settings for Team8 project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.7/topics/settings/
@@ -52,9 +52,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
 )
 
-ROOT_URLCONF = 'forms.urls'
+ROOT_URLCONF = 'Team8.urls'
 
-WSGI_APPLICATION = 'forms.wsgi.application'
+WSGI_APPLICATION = 'Team8.wsgi.application'
 
 
 # Database
