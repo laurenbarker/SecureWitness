@@ -1,0 +1,22 @@
+ <script type="text/javascript">
+            {% if msg %}
+            alert('{{msg }}');
+            {% endif %}
+        </script>
+
+<form action = '/SecureWitness/changeUserSuspensionStatus/' method = 'POST'>
+	{% csrf_token %}
+	{{ form }}
+	<br><br>
+	<input type = 'submit' value='Suspend User' name = 'suspend'>
+	<input type = 'submit' value='Unsuspend User' name = 'unsuspend'>
+</form>
+
+<form action = '/SecureWitness/adminPage/' method = 'POST'>
+	{% csrf_token %}
+	<input type = 'submit' value = 'Return To Admin Page'>
+</form>
+
+<div style="position: fixed; top: 10px; right: 50px;">
+    <a href="/SecureWitness/logout">Logout</a>
+</div>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Secure Witness</title>
+</head>
+<body>
+<b>List of reports submitted by {{ user }}</b>
+{% if report_list %}
+    <br/>
+    Contents of Folder: {{folder_name}}
+    <table border="1">
+        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>File</td><td>Modify Report</td></tr>
+    {% for report in report_list %}
+        <tr>
+            <td>{{report.author}}</td>
+            <td>{{report.shortdesc }}</td>
+            <td>{{report.longdesc}}</td>
+            <td>{{report.location}}</td>
+            <td>{{report.keywords}}</td>
+            <td>{{report.incident_date}}</td>
+            {% if report.file %}
+            <td><a href = 'http://127.0.0.1:8000/SecureWitness/{{report.file.url}}'>File </a></td>
+            {% else %}
+            <td>No File</td>
+            {% endif %}
+            <td><a href="/SecureWitness/viewReport/{{report.shortdesc}}">Modify</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>No reports are available.</p>
+{% endif %}
+<a href="/SecureWitness/search/">Search</a>
+<a href="/SecureWitness/upload/">Upload</a>
+<a href="/SecureWitness/index">Index</a>
+</body>
+</html>

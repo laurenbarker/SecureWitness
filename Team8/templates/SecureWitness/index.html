@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Secure Witness</title>
+</head>
+<body>
+
+<h2>List of Reports</h2>
+{% if not search %}
+<b>List of reports submitted by {{ user }}</b>
+{% else %}
+<b> Search Results</b>
+{% endif %}
+{% if report_list %}
+<br/>
+    Reports not contained in a folder
+    <table border="1">
+        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>File</td>
+            {% if not search %}
+            <td>Modify</td>{% endif %}
+        </tr>
+    {% for report in report_list %}
+        <tr>
+            {% if not report.folder %}
+            <td>{{report.author}}</td>
+            <td>{{report.shortdesc }}</td>
+            <td>{{report.longdesc}}</td>
+            <td>{{report.location}}</td>
+            <td>{{report.keywords}}</td>
+            <td>{{report.incident_date}}</td>
+            {% if report.file %}
+            <td><a href = '{{report.file.url}}'>File </a></td>
+            {% else %}
+            <td>No File</td>
+            {% endif %}
+                {% if not search %}
+            <td><a href="/SecureWitness/viewReport/{{report.shortdesc}}">Modify</a></td>
+                    {% endif %}
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+{% if folder_list %}
+<br/>List of Folders containing Reports
+<table border = "1">
+    <tr><td>Folder Name</td><td>Number of Reports</td><td>Link</td><td>Delete</td><td>Rename</td></tr>
+    {% for key, value in folder_list.items %}
+    <tr>
+    <td>{{key}}</td><td>{{value}}</td><td><a href="/SecureWitness/viewFolder/{{key}}">View Folder</a>
+</td><td><a href="/SecureWitness/deleteFolder/{{key}}">Delete Folder</a></td>
+        <td>
+            <form action="/SecureWitness/renameFolder/{{key}}" method="post">
+                {% csrf_token %}
+        <input type="text" value="Enter new Name" name="new" ><input type="submit" value = "submit">
+        </form></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% if not report_list and not folder_list %}
+    <p>No reports are available.</p>
+{% endif %}
+{% if not search %}
+<p><b>Groups for {{user}}</b></p>
+    {% if group_list %}
+        {% for group in group_list %}
+            <p>{{ group }}</p>
+        {%  endfor %}
+    {% elif not group_list %}
+    <p>{{user}} is not in any groups</p>
+    {% endif %}
+{% endif %}
+
+<div style="position: absolute">
+    <a href="/SecureWitness/homepage"><img style="position: fixed; top: 5px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
+</div>
+<div style="position: absolute; top: 10px; right: 50px;">
+    <a href="/SecureWitness/logout">Logout</a>
+</div>
+
+</body>
+</html>

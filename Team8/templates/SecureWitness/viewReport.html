@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Secure Witness</title>
+    {% block head %}{% endblock %}
+    <!--
+    code for calendar popup taken from https://djangosnippets.org/snippets/2088/
+    -->
+<link rel="stylesheet" type="text/css" href="http://jquery-ui.googlecode.com/svn/tags/latest/themes/base/jquery-ui.css" media="all" />
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $('.vDateField').datepicker();
+    });
+</script>
+</head>
+<body>
+{% if report %}
+<b>Viewing Report: {{report.shortdesc}}</b>
+    <br/>
+      <form method="POST"enctype=multipart/form-data action="/SecureWitness/viewReport/{{report.shortdesc}}">
+            {% csrf_token %}
+    <table border="1">
+        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>Private</td><td>File</td><td>Delete</td><td>Folder</td></tr>
+        <tr>
+            <td>{{report.author}}</td>
+            <td>{{report.shortdesc }}</td>
+            <td>{{report.longdesc}}</td>
+            <td>{{report.location}}</td>
+            <td>{{report.keywords}}</td>
+            <td>{{report.incident_date}}</td>
+            <td>{{report.private}}</td>
+            {% if report.file %}
+            <td><a href = 'http://127.0.0.1:8000/SecureWitness/{{report.file.url}}'>File </a></td>
+            {% else %}
+            <td>No File</td>
+            {% endif %}
+            <td></td>
+            <td>{{ report.folder }}</td>
+        </tr>
+        <tr>
+                <td><input type="submit" value="Change Report Data" ></td>
+           <td> {{ form.shortdesc }}</td>
+            <td> {{ form.longdesc }}</td>
+            <td>{{form.location}}</td>
+            <td>{{form.keywords}}</td>
+            <td>{{form.incident_date}}</td>
+            <td>{{form.private}}</td>
+            <td>{{form.file}}</td>
+            <td><input type="submit" value = "Delete" name="del"></td>
+            <td>{{ form.folder }}</td>
+        </tr>
+    </table>
+      {% if groups %}
+          Access status for each of your groups.<br/>
+          {% for key,value in groups.items %}
+              {% if value %}
+              {{ key }}:<input type="checkbox" value = "{{ key }}" name = "{{ key }}" checked>
+              {% else %}
+                 {{ key }}: <input type="checkbox" value = "{{ key }}" name = "{{ key }}">
+              {% endif %}
+              <br/>
+          {% endfor %}
+          {% endif %}
+    </form>
+{% else %}
+The report has been deleted. Select an option to return to another page.<br/>
+{% endif %}
+<a href="/SecureWitness/search/">Search</a>
+<a href="/SecureWitness/upload/">Upload</a>
+<a href="/SecureWitness/index">Index</a>
+</body>
+</html>

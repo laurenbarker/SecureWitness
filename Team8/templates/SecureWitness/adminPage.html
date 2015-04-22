@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<title>Admin Page</title>
+<body>
+	<a href='/SecureWitness/giveAdminAccess/'>Give User Admin Status</a> <br>
+	<a href='/SecureWitness/changeUserSuspensionStatus/'>Suspend Or Unsuspend A User</a> <br>
+	<a href='/SecureWitness/makeGroup/'>Create Group</a> <br> 
+	<a href='/SecureWitness/addUserToGroup/'>Add User To Group</a> <br>
+	<a href='/SecureWitness/deleteReport/'>Delete A Report </a> <br>
+
+<p> </p>
+        <script type="text/javascript">
+            {% if msg %}
+            alert('{{msg }}');
+            {% endif %}
+        </script>
+<form action = '/SecureWitness/homepage/' method = 'POST'>
+	{% csrf_token %}
+	<input type = 'submit' value = 'General Homepage'>
+</form>
+
+<div style="position: fixed; top: 10px; right: 50px;">
+    <a href="/SecureWitness/logout">Logout</a>
+</div>
+
+ </body>
+</html>

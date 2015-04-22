@@ -1,0 +1,36 @@
+<div style="position: relative">
+    <a href="/SecureWitness/homepage"><img style="position: fixed; top: 5px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
+</div>
+        <script type="text/javascript">
+            {% if msg %}
+            alert('{{msg }}');
+            {% endif %}
+        </script>
+{% if ingroup %}
+<div style="position: fixed; top: 10px; right: 50px;">
+    <a href="/SecureWitness/logout">Logout</a>
+</div>
+<div style="position: relative">
+    <a href="/SecureWitness/homepage"><img style="position: fixed; top: 5px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
+</div>
+    {% if admin %}
+<form action = '/SecureWitness/addUserToGroup/' method = 'POST'>
+{% else %}
+    <form action = '/SecureWitness/addToGroupUser/' method = 'POST'>
+{% endif %}
+	{% csrf_token %}
+	<table align="left">
+    {{ form.as_p }}
+    </table>
+	<input type = 'submit' value='Add User'>
+</form>
+
+{% else %}
+    You are not in any groups.<br/>
+{% endif %}
+{% if admin %}
+<form action = '/SecureWitness/adminPage/' method = 'POST'>
+	{% csrf_token %}
+	<input type = 'submit' value = 'Return To Admin Page'>
+</form>
+{% endif %}

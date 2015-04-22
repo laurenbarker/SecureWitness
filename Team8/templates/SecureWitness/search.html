@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Search Page</title>
+       <!--
+    code for calendar popup taken from https://djangosnippets.org/snippets/2088/
+    -->
+<link rel="stylesheet" type="text/css" href="http://jquery-ui.googlecode.com/svn/tags/latest/themes/base/jquery-ui.css" media="all" />
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $('.vDateField').datepicker();
+    });
+</script>
+</head>
+<body>
+
+<div style="position: absolute">
+    <a href="/SecureWitness/homepage"><img style="position: fixed; top: 5px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
+</div>
+<div style="position: absolute; top: 10px; right: 50px;">
+    <a href="/SecureWitness/logout">Logout</a>
+</div>
+
+<h2>Search</h2>
+<form action="/SecureWitness/search/" method="post" enctype=multipart/form-data>
+    {% csrf_token %}
+    <table style="color:black;text-align:left;">
+        {{ form.as_table }}
+     </table>
+<input type="submit" value="Search" >
+</form>
+</body>
+</html>
