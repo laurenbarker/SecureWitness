@@ -94,7 +94,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Parse database configuration from $DATABASE_URL
 import dj_database_url
-DATABASES['default'] =  dj_database_url.config(default='postgres://ckxzgfdmkhwgfr:-rk3lYyAhv2iMgYfbQmIlL_HYt@ec2-107-22-173-230.compute-1.amazonaws.com:5432/d83mjnvakeicj4')
+DATABASES['default'] =  dj_database_url.config(default='postgres://ngktiiefsblnhu:DJUr6hkxeibJokvTmAaV7Sd9lJ@ec2-23-23-199-181.compute-1.amazonaws.com:5432/d4tpsgkrfdku5d')
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
