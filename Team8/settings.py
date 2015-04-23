@@ -54,7 +54,7 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'forms.urls'
 
-WSGI_APPLICATION = 'forms.wsgi.application'
+WSGI_APPLICATION = 'Team8.wsgi.application'
 
 
 # Database
@@ -92,7 +92,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Parse database configuration from $DATABASE_URL
 import dj_database_url
-DATABASES['default'] =  dj_database_url.config()
+DATABASES['default'] =  dj_database_url.config(default='postgres://ckxzgfdmkhwgfr:-rk3lYyAhv2iMgYfbQmIlL_HYt@ec2-107-22-173-230.compute-1.amazonaws.com:5432/d83mjnvakeicj4')
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
