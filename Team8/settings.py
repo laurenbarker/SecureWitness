@@ -52,7 +52,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
 )
 
-ROOT_URLCONF = 'forms.urls'
+ROOT_URLCONF = 'Team8.urls'
 
 WSGI_APPLICATION = 'Team8.wsgi.application'
 
