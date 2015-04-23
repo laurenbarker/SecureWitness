@@ -654,7 +654,6 @@ def viewAvailableReports(request):
 
         report_list = report_list | group_report_list
 
-
         folders = {}
         for item in folder_list:
             if item.folder not in folders:
@@ -932,24 +931,26 @@ def changeUserSuspensionStatus(request):
     else:
             return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
-def deleteReport(request):
+def deleteReport(request, desc=''):
     if 'u' in request.session:
         if request.method == 'POST':
+
+            if request.POST.get('del'):
+                report_list = report.objects.filter(shortdesc=desc).delete()
+                template = loader.get_template('SecureWitness/deleteReport.html')
+
+                #Delete from directory
+
             form = deleteReportForm(request.POST)
-            if form.is_valid():
-                shortdesc = form.cleaned_data['shortdesc'].strip()
-                try:
-                    someReport = report.objects.get(shortdesc=shortdesc).delete()
-                    form = deleteReportForm()
-                    return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, "msg":"Report has been deleted" })
-                except:
-                    form = deleteReportForm()
-                    return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, 'msg':"Report with given shortdesc does not exist" })
-            else:
-                form = deleteReportForm()
-                return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, 'msg':"Please enter a shortdesc" })
-        else:
+            report_list = report.objects.all()
+
             form = deleteReportForm()
-            return render(request, 'SecureWitness/deleteReport.html', { 'form' : form })
+            return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, 'report_list' : report_list })
+        else:
+            form = deleteReportForm(request.POST)
+            report_list = report.objects.all()
+
+            form = deleteReportForm()
+            return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, 'report_list' : report_list })
     else:
             return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
