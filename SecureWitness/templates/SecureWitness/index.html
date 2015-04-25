@@ -16,13 +16,14 @@
 <br/>
     Reports not contained in a folder
     <table border="1">
-        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>File</td>
+        <tr><td>Report ID</td><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>File</td>
             {% if not search %}
             <td>Modify</td>{% endif %}
         </tr>
     {% for report in report_list %}
         <tr>
             {% if not report.folder %}
+                <td>{{ report.id }}</td>
             <td>{{report.author}}</td>
             <td>{{report.shortdesc }}</td>
             <td>{{report.longdesc}}</td>
@@ -30,12 +31,12 @@
             <td>{{report.keywords}}</td>
             <td>{{report.incident_date}}</td>
             {% if report.file %}
-            <td><a href = '{{report.file.url}}'>File </a></td>
+            <td>{{ report.file.name }}</td>
             {% else %}
             <td>No File</td>
             {% endif %}
                 {% if not search %}
-            <td><a href="/SecureWitness/viewReport/{{report.shortdesc}}">Modify</a></td>
+            <td><a href="/SecureWitness/viewReport/{{report.id}}">Modify</a></td>
                     {% endif %}
             {% endif %}
         </tr>

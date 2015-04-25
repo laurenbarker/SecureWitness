@@ -18,9 +18,9 @@
 </head>
 <body>
 {% if report %}
-<b>Viewing Report: {{report.shortdesc}}</b>
+<b>Viewing Report: {{report.id}}</b>
     <br/>
-      <form method="POST"enctype=multipart/form-data action="/SecureWitness/viewReport/{{report.shortdesc}}">
+      <form method="POST" enctype="multipart/form-data" action="/SecureWitness/viewReport/{{ report.id }}">
             {% csrf_token %}
     <table border="1">
         <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>Private</td><td>File</td><td>Delete</td><td>Folder</td></tr>
@@ -33,7 +33,7 @@
             <td>{{report.incident_date}}</td>
             <td>{{report.private}}</td>
             {% if report.file %}
-            <td><a href = 'http://127.0.0.1:8000/SecureWitness/{{report.file.url}}'>File </a></td>
+            <td>{{report.file.name}}</td>
             {% else %}
             <td>No File</td>
             {% endif %}
@@ -41,8 +41,8 @@
             <td>{{ report.folder }}</td>
         </tr>
         <tr>
-                <td><input type="submit" value="Change Report Data" ></td>
-           <td> {{ form.shortdesc }}</td>
+            <td><input type="submit" value="Change Report Data" name="modify"></td>
+            <td> {{ form.shortdesc }}</td>
             <td> {{ form.longdesc }}</td>
             <td>{{form.location}}</td>
             <td>{{form.keywords}}</td>

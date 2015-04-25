@@ -133,8 +133,7 @@ def viewReports_decrypt(request):
         return HttpResponse("unsuccessful authentication")
 
     u = user.objects.filter(username=u)[0]
-    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
-    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+    report_list = report.objects.filter(Q(author=u)  | Q(private=False))
 
     groups = group.objects.all()
     group_list = []
@@ -150,9 +149,9 @@ def viewReports_decrypt(request):
         for a_report in all_reports:
             if g in a_report.group:
                 #GET REPORT BY UNIQUE IDENTIFIERS
-                report_names.append(a_report.shortdesc)
+                report_names.append(a_report.id)
 
-        group_report_list = report.objects.filter(shortdesc__in=report_names)
+        group_report_list = report.objects.filter(id__in=report_names)
 
         report_list = report_list | group_report_list
   
@@ -176,9 +175,7 @@ def viewFiles_decrypt(request):
         return HttpResponse("unsuccessful authentication")
 
     u = user.objects.filter(username=u)[0]
-    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
-    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
-
+    report_list = report.objects.filter(Q(author=u)  | Q(private=False))
     groups = group.objects.all()
     group_list = []
     for g in groups:
@@ -193,9 +190,9 @@ def viewFiles_decrypt(request):
         for a_report in all_reports:
             if g in a_report.group:
                 #GET REPORT BY UNIQUE IDENTIFIERS
-                report_names.append(a_report.shortdesc)
+                report_names.append(a_report.id)
 
-        group_report_list = report.objects.filter(shortdesc__in=report_names)
+        group_report_list = report.objects.filter(id__in=report_names)
 
         report_list = report_list | group_report_list
   
@@ -203,7 +200,7 @@ def viewFiles_decrypt(request):
     frp = ""
     for r in report_list:
         #rp += str(r)
-        if str(r) == str(rpt):
+        if r.id == int(rpt):
             rp = 'found'
             frp = r
             break
@@ -211,17 +208,18 @@ def viewFiles_decrypt(request):
     if rp != 'found':
         return HttpResponse('Report not found.')
 
-    for reports in report_list:
-        if str(reports) == str(frp):
-            reports.file.name = reports.file.name.split('/')[1]
-            frp = reports.file.name
-            shrt = reports.shortdesc
-            lng = reports.longdesc
-            loc = reports.location
-            kwds = reports.keywords
-            date = reports.incident_date
-            auth = reports.author
-            break
+    #for reports in report_list:
+        #if str(reports) == str(frp):
+    if r.file:
+        r.file.name = r.file.name.split('uploaded_files')[1][1:]
+    frp = r.file.name
+    shrt = r.shortdesc
+    lng = r.longdesc
+    loc = r.location
+    kwds = r.keywords
+    date = r.incident_date
+    auth = r.author
+
 
     
     return HttpResponse(str(rpt) + '\t' + str(auth) + '\t' + str(shrt) + '\t' + str(lng) + '\t' + str(loc) + '\t' + str(kwds) + '\t' + str(date) + '\t' + str(frp) + '\n')
@@ -240,8 +238,7 @@ def uploaded_key(request):
         return HttpResponse("unsuccessful authentication")
 
     u = user.objects.filter(username=u)[0]
-    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
-    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+    report_list = report.objects.filter(Q(author=u)  | Q(private=False))
 
     groups = group.objects.all()
     group_list = []
@@ -257,7 +254,7 @@ def uploaded_key(request):
         for a_report in all_reports:
             if g in a_report.group:
                 #GET REPORT BY UNIQUE IDENTIFIERS
-                report_names.append(a_report.shortdesc)
+                report_names.append(a_report.id)
 
         group_report_list = report.objects.filter(shortdesc__in=report_names)
 
@@ -267,7 +264,7 @@ def uploaded_key(request):
     frp = ""
     for r in report_list:
         #rp += str(r)
-        if str(r) == str(rpt):
+        if r.id == int(rpt):
             rp = 'found'
             frp = r
             break
@@ -277,7 +274,7 @@ def uploaded_key(request):
 
     for reports in report_list:
         if str(reports) == str(frp):
-            reports.file.name = reports.file.name.split('/')[1]
+            reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
             frp = reports.file.name
             if str(frp) != fn:
                 return HttpResponse("Invalid file name.")
@@ -307,13 +304,10 @@ def index(request):
             if name in g.users:
                 group_list.append(g.groupName)
 
-        template = loader.get_template('SecureWitness/index.html')
-        context = RequestContext(request, {
-            'report_list': report_list,
-            'user' : request.session['u'],
-            'folder_list' : folders,
-            'group_list' : group_list,
-        })
+
+        for reports in report_list:
+            if reports.file:
+                reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
         return render(request, 'SecureWitness/index.html', {
             'report_list': report_list,
             'user' : request.session['u'],
@@ -401,6 +395,9 @@ def search(request):
                         if not authorization:
                             desclist.remove(item)
 
+            for reports in desclist:
+                if reports.file:
+                    reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
             template = loader.get_template('SecureWitness/index.html')
             context = RequestContext(request, {
                   'report_list': desclist,
@@ -482,9 +479,17 @@ def upload(request):
             if f:
                 rep.f = myf
             rep.save()
-            return HttpResponse("added successfully")
+            #get groups user is in
+            group_list = []
+            groups = group.objects.all()
+            for g in groups:
+                users = json.loads(g.users)
+                if request.session['u'] in users[g.groupName]:
+                    group_list.append(g.groupName)
+            form = UploadFileForm(group_list)
+            return render(request,'SecureWitness/upload.html', {'form': form, 'msg':'Report was added successfully'})
         else:
-            return render(request,'SecureWitness/upload.html', {'form': form})
+            return render(request,'SecureWitness/upload.html', {'form': form, 'msg':'Short description and long description are required.'})
     elif 'u' in request.session:
         #get groups user is in
         group_list = []
@@ -516,6 +521,10 @@ def viewFolder(request, folder=""):
         u = user.objects.filter(username=name)[0]
         report_list = report.objects.filter(folder = folder).filter(author=u)
         template = loader.get_template('SecureWitness/viewFolder.html')
+
+        for reports in report_list:
+            if reports.file:
+                reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
         context = RequestContext(request, {
                 'report_list': report_list,
                 'user' : request.session['u'],
@@ -525,18 +534,18 @@ def viewFolder(request, folder=""):
     else:
         return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
-def viewReport(request, desc=""):
+def viewReport(request, number=""):
     if 'u' in request.session:
         if request.method == 'POST':
             if request.POST.get('del'):
-                report_list = report.objects.filter(shortdesc=desc).delete()
+                report_list = report.objects.filter(id=number).delete()
                 template = loader.get_template('SecureWitness/viewReport.html')
                 context = RequestContext(request, {
                    'user' : request.session['u'],
                 })
                 return HttpResponse(template.render(context))
             else:
-                form = UploadFileForm(request.POST, request.FILES)
+
                 short = request.POST.get('shortdesc')
                 long = request.POST.get('longdesc')
                 loc = request.POST.get('location')
@@ -555,7 +564,7 @@ def viewReport(request, desc=""):
                 fold = request.POST.get('folder')
                 name = request.session['u']
                 u = user.objects.filter(username=name)[0]
-                report_list = report.objects.filter(shortdesc=desc).filter(author=u)[0]
+                report_list = report.objects.filter(id=number)[0]
                 if short:
                     report_list.shortdesc = short
                 if long:
@@ -592,15 +601,14 @@ def viewReport(request, desc=""):
                 else:
                     report_list.group = json.dumps({})
                 report_list.save()
-                if short:
-                    return HttpResponseRedirect( short)
-                else:
-                    return HttpResponseRedirect( report_list.shortdesc)
+                if report_list.file:
+                    report_list.file.name = report_list.file.name.split('uploaded_files')[1][1:]
+                return HttpResponseRedirect(number)
         else:
             name = request.session['u']
             u = user.objects.filter(username=name)[0]
-            report_list = report.objects.filter(shortdesc=desc).filter(author=u)[0]
-            template = loader.get_template('SecureWitness/viewReport.html')
+            report_list = report.objects.get(id=number)
+            template = loader.get_template('SecureWitness/viewReport.html/')
             #get groups user is in
             group_list = []
             groups = group.objects.all()
@@ -617,6 +625,10 @@ def viewReport(request, desc=""):
                     group_dict[g] = True
                 else:
                     group_dict[g] = False
+
+            if report_list.file:
+                report_list.file.name = report_list.file.name.split('uploaded_files')[1][1:]
+
             context = RequestContext(request, {
                     'report': report_list,
                     'user' : request.session['u'],
@@ -631,8 +643,7 @@ def viewAvailableReports(request):
     if 'u' in request.session:
         name = request.session['u']
         u = user.objects.filter(username=name)[0]
-        report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
-        folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+        report_list = report.objects.filter(Q(author=u)  | Q(private=False))
 
         groups = group.objects.all()
         group_list = []
@@ -648,39 +659,19 @@ def viewAvailableReports(request):
             for a_report in all_reports:
                 if g in a_report.group:
                     #GET REPORT BY UNIQUE IDENTIFIERS
-                    report_names.append(a_report.shortdesc)
+                    report_names.append(a_report.id)
 
-        group_report_list = report.objects.filter(shortdesc__in=report_names)
+        group_report_list = report.objects.filter(id__in=report_names)
 
         report_list = report_list | group_report_list
 
-        folders = {}
-        for item in folder_list:
-            if item.folder not in folders:
-                folders[item.folder] = 1
-            else:
-                folders[item.folder] += 1
-
-        list = group.objects.all()
-        group_list = []
-        for g in list:
-            if name in g.users:
-                group_list.append(g.groupName)
-
         for reports in report_list:
-            reports.file.name = reports.file.name.split('/')[1]
+            if reports.file:
+                reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
 
-        template = loader.get_template('SecureWitness/availableReports.html')
-        context = RequestContext(request, {
-            'report_list': report_list,
-            'user' : request.session['u'],
-            'folder_list' : folders,
-            'group_list' : group_list,
-        })
         return render(request, 'SecureWitness/availableReports.html', {
             'report_list': report_list,
             'user' : request.session['u'],
-            'folder_list' : folders,
             'group_list' : group_list,
         })
     else:

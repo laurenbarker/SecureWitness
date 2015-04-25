@@ -1,5 +1,6 @@
 from django.db import models
 import json
+import os
 
 class user(models.Model):
     username = models.CharField(max_length=50)
@@ -24,7 +25,8 @@ class report(models.Model):
     file = models.FileField(upload_to='uploaded_files',null = True, blank = True)
     key = models.CharField(blank = True, max_length=2048)
     def __str__(self):
-        return   self.shortdesc
+        return   "Report Number: " + str(self.id) + " Short Description: " + self.shortdesc
+
 
 class group(models.Model):
     users = models.CharField(max_length=500, blank=True)
