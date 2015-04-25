@@ -69,15 +69,6 @@ DATABASES = {
     }
 }
 
-#amazon S3
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_STORAGE_BUCKET_NAME = 'securewitness'
-AWS_ACCESS_KEY_ID = 'AKIAJUOPKYN7Q4PFHEXQ'
-AWS_SECRET_ACCESS_KEY = '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'
-from S3 import CallingFormat
-AWS_CALLING_FORMAT = CallingFormat.SUBDOMAIN
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
