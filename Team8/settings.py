@@ -10,10 +10,12 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-TEMPLATE_DIRS = ('%s/templates/'% (PROJECT_DIR),)
+# TEMPLATE_DIRS = ('%s/templates/'% (PROJECT_DIR),)
+
+TEMPLATE_DIRS = ['/templates/']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
@@ -52,9 +54,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
 )
 
-ROOT_URLCONF = 'forms.urls'
+ROOT_URLCONF = 'Team8.urls'
 
-WSGI_APPLICATION = 'forms.wsgi.application'
+WSGI_APPLICATION = 'Team8.wsgi.application'
 
 
 # Database
@@ -92,7 +94,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Parse database configuration from $DATABASE_URL
 import dj_database_url
-DATABASES['default'] =  dj_database_url.config()
+DATABASES['default'] =  dj_database_url.config(default='postgres://ngktiiefsblnhu:DJUr6hkxeibJokvTmAaV7Sd9lJ@ec2-23-23-199-181.compute-1.amazonaws.com:5432/d4tpsgkrfdku5d')
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

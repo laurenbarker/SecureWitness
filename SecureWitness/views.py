@@ -133,8 +133,7 @@ def viewReports_decrypt(request):
         return HttpResponse("unsuccessful authentication")
 
     u = user.objects.filter(username=u)[0]
-    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
-    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+    report_list = report.objects.filter(Q(author=u)  | Q(private=False))
 
     groups = group.objects.all()
     group_list = []
@@ -150,9 +149,9 @@ def viewReports_decrypt(request):
         for a_report in all_reports:
             if g in a_report.group:
                 #GET REPORT BY UNIQUE IDENTIFIERS
-                report_names.append(a_report.shortdesc)
+                report_names.append(a_report.id)
 
-        group_report_list = report.objects.filter(shortdesc__in=report_names)
+        group_report_list = report.objects.filter(id__in=report_names)
 
         report_list = report_list | group_report_list
   
@@ -176,9 +175,7 @@ def viewFiles_decrypt(request):
         return HttpResponse("unsuccessful authentication")
 
     u = user.objects.filter(username=u)[0]
-    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
-    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
-
+    report_list = report.objects.filter(Q(author=u)  | Q(private=False))
     groups = group.objects.all()
     group_list = []
     for g in groups:
@@ -193,9 +190,9 @@ def viewFiles_decrypt(request):
         for a_report in all_reports:
             if g in a_report.group:
                 #GET REPORT BY UNIQUE IDENTIFIERS
-                report_names.append(a_report.shortdesc)
+                report_names.append(a_report.id)
 
-        group_report_list = report.objects.filter(shortdesc__in=report_names)
+        group_report_list = report.objects.filter(id__in=report_names)
 
         report_list = report_list | group_report_list
   
@@ -203,7 +200,7 @@ def viewFiles_decrypt(request):
     frp = ""
     for r in report_list:
         #rp += str(r)
-        if str(r) == str(rpt):
+        if r.id == int(rpt):
             rp = 'found'
             frp = r
             break
@@ -211,17 +208,18 @@ def viewFiles_decrypt(request):
     if rp != 'found':
         return HttpResponse('Report not found.')
 
-    for reports in report_list:
-        if str(reports) == str(frp):
-            reports.file.name = reports.file.name.split('/')[1]
-            frp = reports.file.name
-            shrt = reports.shortdesc
-            lng = reports.longdesc
-            loc = reports.location
-            kwds = reports.keywords
-            date = reports.incident_date
-            auth = reports.author
-            break
+    #for reports in report_list:
+        #if str(reports) == str(frp):
+    if r.file:
+        r.file.name = r.file.name.split('uploaded_files')[1][1:]
+    frp = r.file.name
+    shrt = r.shortdesc
+    lng = r.longdesc
+    loc = r.location
+    kwds = r.keywords
+    date = r.incident_date
+    auth = r.author
+
 
     
     return HttpResponse(str(rpt) + '\t' + str(auth) + '\t' + str(shrt) + '\t' + str(lng) + '\t' + str(loc) + '\t' + str(kwds) + '\t' + str(date) + '\t' + str(frp) + '\n')
@@ -240,8 +238,7 @@ def uploaded_key(request):
         return HttpResponse("unsuccessful authentication")
 
     u = user.objects.filter(username=u)[0]
-    report_list = report.objects.filter(Q(author=u) & (Q(folder = None) | Q(folder = "")) | Q(private=False))
-    folder_list = report.objects.exclude(folder=None).exclude(folder="").filter(author=u)
+    report_list = report.objects.filter(Q(author=u)  | Q(private=False))
 
     groups = group.objects.all()
     group_list = []
@@ -257,7 +254,7 @@ def uploaded_key(request):
         for a_report in all_reports:
             if g in a_report.group:
                 #GET REPORT BY UNIQUE IDENTIFIERS
-                report_names.append(a_report.shortdesc)
+                report_names.append(a_report.id)
 
         group_report_list = report.objects.filter(shortdesc__in=report_names)
 
@@ -267,7 +264,7 @@ def uploaded_key(request):
     frp = ""
     for r in report_list:
         #rp += str(r)
-        if str(r) == str(rpt):
+        if r.id == int(rpt):
             rp = 'found'
             frp = r
             break
@@ -277,7 +274,7 @@ def uploaded_key(request):
 
     for reports in report_list:
         if str(reports) == str(frp):
-            reports.file.name = reports.file.name.split('/')[1]
+            reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
             frp = reports.file.name
             if str(frp) != fn:
                 return HttpResponse("Invalid file name.")
@@ -925,24 +922,26 @@ def changeUserSuspensionStatus(request):
     else:
             return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
-def deleteReport(request):
+def deleteReport(request, desc=''):
     if 'u' in request.session:
         if request.method == 'POST':
+
+            if request.POST.get('del'):
+                report_list = report.objects.filter(shortdesc=desc).delete()
+                template = loader.get_template('SecureWitness/deleteReport.html')
+
+                #Delete from directory
+
             form = deleteReportForm(request.POST)
-            if form.is_valid():
-                shortdesc = form.cleaned_data['shortdesc'].strip()
-                try:
-                    someReport = report.objects.get(shortdesc=shortdesc).delete()
-                    form = deleteReportForm()
-                    return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, "msg":"Report has been deleted" })
-                except:
-                    form = deleteReportForm()
-                    return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, 'msg':"Report with given shortdesc does not exist" })
-            else:
-                form = deleteReportForm()
-                return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, 'msg':"Please enter a shortdesc" })
-        else:
+            report_list = report.objects.all()
+
             form = deleteReportForm()
-            return render(request, 'SecureWitness/deleteReport.html', { 'form' : form })
+            return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, 'report_list' : report_list })
+        else:
+            form = deleteReportForm(request.POST)
+            report_list = report.objects.all()
+
+            form = deleteReportForm()
+            return render(request, 'SecureWitness/deleteReport.html', { 'form' : form, 'report_list' : report_list })
     else:
             return render(request, 'SecureWitness/login.html', {'form' : loginForm()})

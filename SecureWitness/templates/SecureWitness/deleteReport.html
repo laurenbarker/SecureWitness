@@ -3,12 +3,32 @@
             alert('{{msg }}');
             {% endif %}
         </script>
-<form action = '/SecureWitness/deleteReport/' method = 'POST'>
-	{% csrf_token %}
-    {{ form }}
-	<br><br>
-	<input type = 'submit' value='Delete Report'>
-</form>
+<br/>
+    <table border="1">
+        <tr><td>Author</td><td>Short Description</td><td> Long Description</td> <td>Location</td> <td> Keywords</td> <td>Incident Date </td><td>Private</td><td>File</td><td>Delete</td><td>Folder</td></tr>
+        {% for report in report_list %}
+        <tr>
+            <td>{{report.author}}</td>
+            <td>{{report.shortdesc }}</td>
+            <td>{{report.longdesc}}</td>
+            <td>{{report.location}}</td>
+            <td>{{report.keywords}}</td>
+            <td>{{report.incident_date}}</td>
+            <td>{{report.private}}</td>
+              {% if report.file %}
+                <td><a href = 'http://127.0.0.1:8000/SecureWitness/{{report.file.url}}'>File </a></td>
+              {% else %}
+                <td>No File</td>
+              {% endif %}
+              <form method="POST" action = '/SecureWitness/deleteReport/{{report.shortdesc}}'>
+              {% csrf_token %}
+              <td><input type="submit" value = "Delete" name="del"></td>
+              </form>
+            <td>{{ report.folder }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+<br>
 
 <form action = '/SecureWitness/adminPage/' method = 'POST'>
 	{% csrf_token %}
