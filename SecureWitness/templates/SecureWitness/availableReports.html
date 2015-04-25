@@ -39,24 +39,7 @@
     {% endfor %}
     </table>
 {% endif %}
-{% if folder_list %}
-<br/>Reports you can see that are in folders
-<table border = "1">
-    <tr><td>Folder Name</td><td>Number of Reports</td><td>Link</td><td>Delete</td><td>Rename</td></tr>
-    {% for key, value in folder_list.items %}
-    <tr>
-    <td>{{key}}</td><td>{{value}}</td><td><a href="/SecureWitness/viewFolder/{{key}}">View Folder</a>
-</td><td><a href="/SecureWitness/deleteFolder/{{key}}">Delete Folder</a></td>
-        <td>
-            <form action="/SecureWitness/renameFolder/{{key}}" method="post">
-                {% csrf_token %}
-        <input type="text" value="Enter new Name" name="new" ><input type="submit" value = "submit">
-        </form></td>
-    </tr>
-    {% endfor %}
-</table>
-{% endif %}
-{% if not report_list and not folder_list %}
+{% if not report_list %}
     <p>No reports are available.</p>
 {% endif %}
 

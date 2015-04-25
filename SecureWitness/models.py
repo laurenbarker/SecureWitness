@@ -1,5 +1,6 @@
 from django.db import models
 import json
+import os
 
 class user(models.Model):
     username = models.CharField(max_length=50)
@@ -26,6 +27,7 @@ class report(models.Model):
     def __str__(self):
         return   self.shortdesc
 
+    
 class group(models.Model):
     users = models.CharField(max_length=500, blank=True)
     groupName = models.CharField(max_length=100, blank=True)
