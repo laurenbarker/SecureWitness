@@ -27,7 +27,7 @@ class report(models.Model):
     def __str__(self):
         return   self.shortdesc
 
-    
+
 class group(models.Model):
     users = models.CharField(max_length=500, blank=True)
     groupName = models.CharField(max_length=100, blank=True)
