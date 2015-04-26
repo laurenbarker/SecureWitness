@@ -10,8 +10,8 @@ urlpatterns = patterns('',
     url(r'^login/$', views.login, name='login'),
     url(r'^adminPage/$', views.adminPage, name='adminPage'),
     url(r'^homepage/$', views.homepage, name='homepage'),
-    url(r'^uploaded_files/(?P<path>.*)$', 'django.views.static.serve', {
-        'document_root': settings.MEDIA_ROOT + "/uploaded_files"}),
+    #url(r'^uploaded_files/(?P<path>.*)$', 'django.views.static.serve', {
+        #'document_root': settings.MEDIA_ROOT + "/uploaded_files"}),
     url(r'^viewFolder/(?P<folder>.*)$', views.viewFolder, name='viewFolder'),
     url(r'^deleteFolder/(?P<folder>.*)$', views.deleteFolder, name='deleteFolder'),
     url(r'^renameFolder/(?P<folder>.*)$', views.renameFolder, name='renameFolder'),
@@ -28,4 +28,6 @@ urlpatterns = patterns('',
     url(r'^uploaded_key/$', views.uploaded_key, name = 'uploaded_key'),
     url(r'^viewAvailableReports/$', views.viewAvailableReports, name = 'viewAvailableReports'),
     url(r'^logout/$', views.logout_view, name='logout'),
+    url(r'^uploaded_files/(?P<path>.*)$', 'django.views.static.serve', {
+        'document_root': settings.STATIC_ROOT + "/uploaded_files"}),
 )
