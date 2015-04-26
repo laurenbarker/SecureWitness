@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python3
 
 from Crypto.PublicKey import RSA
 from Crypto import Random
@@ -17,7 +17,7 @@ psswrd = getpass.getpass("Please enter your Secure Witness password: ")
 
 # if logged in properly then show files available
 payload = {'username': usrnm, 'password': psswrd}
-r = requests.post("http://localhost:8000/SecureWitness/login_decrypt/", data=payload)
+r = requests.post("http://127.0.0.1:5000/SecureWitness/login_decrypt/", data=payload)
 print(r.text)
 # if authentification failed then quit
 if r.text == "unsuccessful authentication" or r.text == 'Your account has been suspended by an administrator':
@@ -26,7 +26,7 @@ if r.text == "unsuccessful authentication" or r.text == 'Your account has been s
 
 # display reports that can be downloaded
 payload = {'username': usrnm, 'password': psswrd}
-r = requests.post("http://localhost:8000/SecureWitness/viewReports_decrypt/", data=payload)
+r = requests.post("http://127.0.0.1:5000/SecureWitness/viewReports_decrypt/", data=payload)
 print("Reports you have access to:")
 print(r.text)
 if r.text == "unsuccessful authentication":
@@ -38,7 +38,7 @@ while check == False:
     # display files that can be downloaded in specified report
     rpt = input("Please enter the report number you would like to view: ")
     payload = {'username': usrnm, 'password': psswrd, 'report': rpt}
-    r = requests.post("http://localhost:8000/SecureWitness/viewFiles_decrypt/", data=payload)
+    r = requests.post("http://127.0.0.1:5000/SecureWitness/viewFiles_decrypt/", data=payload)
     if r.text == "unsuccessful authentication":
         print("Exiting application...")
         sys.exit(0)
@@ -65,7 +65,7 @@ while check == False:
 
     # check if user has access via django server and get key to decrypt
     payload = {'username': usrnm, 'password': psswrd, 'report': rpt, 'file': file_enc}
-    r = requests.post('http://localhost:8000/SecureWitness/uploaded_key/', data=payload)
+    r = requests.post('http://127.0.0.1:5000/SecureWitness/uploaded_key/', data=payload)
     #print r.text
 
     if r.text == "unsuccessful authentication" or r.text == 'Your account has been suspended by an administrator':
@@ -73,7 +73,7 @@ while check == False:
         sys.exit(0)
     if r.text != "Invalid file name.":
         check = True
-        print(r.content)
+        #print(r.content)
         key = RSA.importKey(r.content)
 
 
@@ -81,7 +81,7 @@ while check == False:
         print("File not found. Please enter a valid file name.")
 
 # gets file to decrpyt
-r = requests.get('http://localhost:8000/SecureWitness/uploaded_files/' + file_enc)
+r = requests.get('http://127.0.0.1:5000/SecureWitness/uploaded_files/' + file_enc)
 enc_data = r.content
 
 # decrypt 
