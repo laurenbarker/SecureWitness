@@ -307,7 +307,7 @@ def index(request):
 
         for reports in report_list:
             if reports.file:
-                reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
+                reports.file.name = reports.file.name.split('staticfiles')[1][1:]
         return render(request, 'SecureWitness/index.html', {
             'report_list': report_list,
             'user' : request.session['u'],
@@ -601,7 +601,7 @@ def viewReport(request, number=""):
                     report_list.group = json.dumps({})
                 report_list.save()
                 if report_list.file:
-                    report_list.file.name = report_list.file.name.split('uploaded_files')[1][1:]
+                    report_list.file.name = report_list.file.name.split('staticfiles')[1][1:]
                 return HttpResponseRedirect(number)
         else:
             name = request.session['u']
@@ -626,7 +626,7 @@ def viewReport(request, number=""):
                     group_dict[g] = False
 
             if report_list.file:
-                report_list.file.name = report_list.file.name.split('uploaded_files')[1][1:]
+                report_list.file.name = report_list.file.name.split('staticfiles')[1][1:]
 
             context = RequestContext(request, {
                     'report': report_list,
@@ -666,7 +666,7 @@ def viewAvailableReports(request):
 
         for reports in report_list:
             if reports.file:
-                reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
+                reports.file.name = reports.file.name.split("/")[1]
 
         return render(request, 'SecureWitness/availableReports.html', {
             'report_list': report_list,
@@ -921,15 +921,15 @@ def changeUserSuspensionStatus(request):
     else:
             return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
-def deleteReport(request, desc=''):
+def deleteReport(request, number=''):
     if 'u' in request.session:
         if request.method == 'POST':
-
             if request.POST.get('del'):
-                report_list = report.objects.filter(shortdesc=desc).delete()
-                template = loader.get_template('SecureWitness/deleteReport.html')
+                #DELETE FILE HERE
+                report_list = report.objects.filter(id=number).delete()
 
-                #Delete from directory
+
+                template = loader.get_template('SecureWitness/deleteReport.html')
 
             form = deleteReportForm(request.POST)
             report_list = report.objects.all()
