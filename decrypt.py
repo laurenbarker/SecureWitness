@@ -37,9 +37,18 @@ while check == False:
     rpt = input("Please enter the report number you would like to view: ")
     payload = {'username': usrnm, 'password': psswrd, 'report': rpt}
     r = requests.post("http://127.0.0.1:5000/SecureWitness/viewFiles_decrypt/", data=payload)
+
+    print (r.text)
+    sys.exit(0)
+
+    newFile = open('test.txt', 'w')
+    newFile.write(r.text)
+    newFile.close()
+
     if r.text == "unsuccessful authentication":
         print("Exiting application...")
         sys.exit(0)
+
     if r.text != "Report not found.":
         check = True
         data = r.text.split("\t")
@@ -80,7 +89,7 @@ while check == False:
         print("File not found. Please enter a valid file name.")
 
 # gets file to decrpyt
-r = requests.get('http://127.0.0.1:5000/SecureWitness/uploaded_files/' + file_enc)
+r = requests.get('http://127.0.0.1:5000/SecureWitness/staticfiles/' + file_enc)
 enc_data = r.content
 #print(enc_data)
 # decrypt 

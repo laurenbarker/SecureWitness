@@ -195,7 +195,7 @@ def viewFiles_decrypt(request):
         group_report_list = report.objects.filter(id__in=report_names)
 
         report_list = report_list | group_report_list
-  
+    return HttpResponse('this works')
     rp = ""
     frp = ""
     for r in report_list:
@@ -210,7 +210,7 @@ def viewFiles_decrypt(request):
 
     #for reports in report_list:
         #if str(reports) == str(frp):
-    return HttpResponse(r.file.name)
+
     if r.file:
         r.file.name = r.file.name.split('staticfiles')[1][1:]
     frp = r.file.name
