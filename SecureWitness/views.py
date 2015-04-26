@@ -486,7 +486,7 @@ def upload(request):
                 if request.session['u'] in users[g.groupName]:
                     group_list.append(g.groupName)
             form = UploadFileForm(group_list)
-            return render(request,'SecureWitness/upload.html', {'form': form, 'msg':testing})
+            return render(request,'SecureWitness/upload.html', {'form': form, 'msg': "hello"})
         else:
             return render(request,'SecureWitness/upload.html', {'form': form, 'msg':'Short description and long description are required.'})
     elif 'u' in request.session:
