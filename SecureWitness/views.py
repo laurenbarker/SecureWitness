@@ -457,8 +457,8 @@ def upload(request):
 
                 newName = f.name + "_enc"
 
-                path2 = os.path.join(settings.MEDIA_ROOT, 'static_files', newName)
-                path = os.path.join('static_files', newName)
+                path2 = os.path.join(settings.STATIC_ROOT, 'staticfiles', newName)
+                path = os.path.join('staticfiles', newName)
                 myf = open(path2, "w+b")
                 #testing = []
                 for chunk in f.chunks():
