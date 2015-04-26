@@ -38,12 +38,12 @@ while check == False:
     payload = {'username': usrnm, 'password': psswrd, 'report': rpt}
     r = requests.post("http://127.0.0.1:5000/SecureWitness/viewFiles_decrypt/", data=payload)
 
-    print (r.text)
-    sys.exit(0)
+    #print (r.text)
+    #sys.exit(0)
 
-    newFile = open('test.txt', 'w')
-    newFile.write(r.text)
-    newFile.close()
+    #newFile = open('test.txt', 'w')
+    #newFile.write(r.text)
+    #newFile.close()
 
     if r.text == "unsuccessful authentication":
         print("Exiting application...")

@@ -195,7 +195,7 @@ def viewFiles_decrypt(request):
         group_report_list = report.objects.filter(id__in=report_names)
 
         report_list = report_list | group_report_list
-    return HttpResponse('this works')
+    #return HttpResponse('this works')
     rp = ""
     frp = ""
     for r in report_list:
