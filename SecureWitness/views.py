@@ -537,6 +537,16 @@ def viewReport(request, number=""):
     if 'u' in request.session:
         if request.method == 'POST':
             if request.POST.get('del'):
+
+                #Delete file from directory
+                report_file = report.objects.filter(id=number)
+                for r in report_file:
+                    if r.file:
+                        try: 
+                            os.remove(r.file.name)                            
+                        except:
+                            msg = 'No file was found'
+
                 report_list = report.objects.filter(id=number).delete()
                 template = loader.get_template('SecureWitness/viewReport.html')
                 context = RequestContext(request, {
@@ -925,10 +935,16 @@ def deleteReport(request, number=''):
     if 'u' in request.session:
         if request.method == 'POST':
             if request.POST.get('del'):
-                #DELETE FILE HERE
+
+                report_file = report.objects.filter(id=number)
+                for r in report_file:
+                    if r.file:
+                        try: 
+                            os.remove(r.file.name)                            
+                        except:
+                            msg = 'No file was found'
+
                 report_list = report.objects.filter(id=number).delete()
-
-
                 template = loader.get_template('SecureWitness/deleteReport.html')
 
             form = deleteReportForm(request.POST)
