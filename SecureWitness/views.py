@@ -210,8 +210,9 @@ def viewFiles_decrypt(request):
 
     #for reports in report_list:
         #if str(reports) == str(frp):
+    return HttpResponse(r.file.name)
     if r.file:
-        r.file.name = r.file.name.split('uploaded_files')[1][1:]
+        r.file.name = r.file.name.split('staticfiles')[1][1:]
     frp = r.file.name
     shrt = r.shortdesc
     lng = r.longdesc
@@ -274,7 +275,7 @@ def uploaded_key(request):
 
     for reports in report_list:
         if str(reports) == str(frp):
-            reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
+            reports.file.name = reports.file.name.split('staticfiles')[1][1:]
             frp = reports.file.name
             if str(frp) != fn:
                 return HttpResponse("Invalid file name.")

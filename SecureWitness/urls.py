@@ -28,6 +28,6 @@ urlpatterns = patterns('',
     url(r'^uploaded_key/$', views.uploaded_key, name = 'uploaded_key'),
     url(r'^viewAvailableReports/$', views.viewAvailableReports, name = 'viewAvailableReports'),
     url(r'^logout/$', views.logout_view, name='logout'),
-    url(r'^uploaded_files/(?P<path>.*)$', 'django.views.static.serve', {
-        'document_root': settings.STATIC_ROOT + "/uploaded_files"}),
+    url(r'^staticfiles/(?P<path>.*)$', 'django.views.static.serve', {
+        'document_root': settings.STATIC_ROOT + "/staticfiles"}),
 )
