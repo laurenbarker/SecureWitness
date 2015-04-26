@@ -82,18 +82,18 @@ while check == False:
 # gets file to decrpyt
 r = requests.get('http://127.0.0.1:5000/SecureWitness/uploaded_files/' + file_enc)
 enc_data = r.content
-print(enc_data)
+#print(enc_data)
 # decrypt 
 # print decrypted file contents
 decrypted = key.decrypt(enc_data)
-#print decrypted
+print (decrypted)
 
 # write back descrypted to file
 downloads_dir = expanduser("~/Downloads/") + file_enc
 
-newFile = open(downloads_dir, 'wb')
+newFile = open(downloads_dir, 'w+b')
 #print(decrypted.decode(encoding='utf-8'))
-newFile.write(enc_data)
+newFile.write(decrypted)
 newFile.close()
 
 print("File downloaded to '" + downloads_dir + "'")

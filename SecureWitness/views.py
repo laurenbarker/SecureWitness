@@ -460,11 +460,11 @@ def upload(request):
                 path2 = os.path.join(settings.MEDIA_ROOT, 'uploaded_files', newName)
                 path = os.path.join('uploaded_files', newName)
                 myf = open(path2, "w+b")
-                testing = []
+                #testing = []
                 for chunk in f.chunks():
                     enc_data = public_key.encrypt(chunk, 32)
                     myf.write(enc_data[0])
-                    testing.append(enc_data[0])
+                    #testing.append(enc_data[0])
                 f = path
             else:
                 pkey = ""
@@ -475,7 +475,7 @@ def upload(request):
                 fold = None
             rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = fold, key = pkey)
             rep.group = json.dumps(group_access)
-
+            rep.f = myf
             rep.save()
             #get groups user is in
             group_list = []
