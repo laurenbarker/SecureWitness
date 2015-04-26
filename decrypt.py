@@ -10,11 +10,9 @@ from os.path import expanduser
 
 # enter username
 usrnm = input("Please enter your Secure Witness username: ")
-# print ('Your input was' + " " + usrnm)
 # enter password
-psswrd = getpass.getpass("Please enter your Secure Witness password: ")
+psswrd = input("Please enter your Secure Witness password: ")
 #print ('Your input was' + " " + psswrd)
-
 # if logged in properly then show files available
 payload = {'username': usrnm, 'password': psswrd}
 r = requests.post("http://localhost:8000/SecureWitness/login_decrypt/", data=payload)
@@ -73,8 +71,8 @@ while check == False:
         sys.exit(0)
     if r.text != "Invalid file name.":
         check = True
-        print(r.content)
-        key = RSA.importKey(r.content)
+
+        key = RSA.importKey(r.text)
 
 
     else:
@@ -83,7 +81,7 @@ while check == False:
 # gets file to decrpyt
 r = requests.get('http://localhost:8000/SecureWitness/uploaded_files/' + file_enc)
 enc_data = r.content
-
+print(enc_data)
 # decrypt 
 # print decrypted file contents
 decrypted = key.decrypt(enc_data)
@@ -92,8 +90,9 @@ decrypted = key.decrypt(enc_data)
 # write back descrypted to file
 downloads_dir = expanduser("~/Downloads/") + file_enc
 
-newFile = open(downloads_dir, 'w')
-newFile.write(decrypted)
+newFile = open(downloads_dir, 'wb')
+#print(decrypted.decode(encoding='utf-8'))
+newFile.write(enc_data)
 newFile.close()
 
 print("File downloaded to '" + downloads_dir + "'")
