@@ -1,12 +1,61 @@
 <!DOCTYPE html>
 <html>
 <title>Admin Page</title>
+<style type="text/css">
+div#lg {
+    position: absolute;
+    top: 20px;
+    right: 50px;
+}
+div#lg a:link {
+    margin: 0;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: medium;
+}
+div#buttons {
+    padding-top: 15px;
+    text-align: center;
+}
+div#buttons a{
+    margin: 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    padding: 5px 10px 5px 10px;
+    font-size: 18px;
+    display: inline-block;
+    color: black;
+    border: 2px black solid;
+}
+div#buttons a#small {
+    margin: 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    padding: 5px 30px 5px 30px;
+    font-size: 18px;
+    display: inline-block;
+    color: black;
+    border: 2px black solid;
+}
+div#buttons a:hover {
+    background-color: lightgray;
+    border: 2px lightgray solid;
+}
+div#buttons a#small:hover {
+    background-color: lightgray;
+    border: 2px lightgray solid;
+}
+</style>
 <body>
-	<a href='/SecureWitness/giveAdminAccess/'>Give User Admin Status</a> <br>
-	<a href='/SecureWitness/changeUserSuspensionStatus/'>Suspend Or Unsuspend A User</a> <br>
-	<a href='/SecureWitness/makeGroup/'>Create Group</a> <br> 
-	<a href='/SecureWitness/addUserToGroup/'>Add User To Group</a> <br>
-	<a href='/SecureWitness/deleteReport/'>Delete A Report </a> <br>
+<h1>SecureWitness</h1>
+<b>Admin Homepage</b>
+<div id="buttons">
+    <a href='/SecureWitness/giveAdminAccess/'>Give User Admin Status</a>
+    <a href='/SecureWitness/changeUserSuspensionStatus/'>Suspend Or Unsuspend A User</a>
+    <a href='/SecureWitness/makeGroup/'>Create Group</a>
+    <a href='/SecureWitness/addUserToGroup/'>Add User To Group</a>
+    <a href='/SecureWitness/deleteReport/'>Delete A Report</a>
+</div>
 
 <p> </p>
         <script type="text/javascript">
@@ -14,12 +63,15 @@
             alert('{{msg }}');
             {% endif %}
         </script>
-<form action = '/SecureWitness/homepage/' method = 'POST'>
+
+<!--<form action = '/SecureWitness/homepage/' method = 'POST'>
 	{% csrf_token %}
 	<input type = 'submit' value = 'General Homepage'>
-</form>
+</form>-->
 
-<div style="position: fixed; top: 10px; right: 50px;">
+<div id="buttons"><a href="/SecureWitness/homepage/">General Homepage</a></div>
+
+<div id="lg">
     <a href="/SecureWitness/logout">Logout</a>
 </div>
 

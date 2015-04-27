@@ -59,12 +59,6 @@ div#buttons a#small:hover {
 
 <b>Welcome {{ user }}</b><br/>
 <p> </p>
-<!--<p><a href="/SecureWitness/search/">Search</a></p>
-<p><a href="/SecureWitness/upload/">Upload</a></p>
-<p><a href="/SecureWitness/index">Index</a></p>
-<p><a href="/SecureWitness/addToGroupUser">Add Other Users To Your Groups</a></p>
-<p><a href="/SecureWitness/viewAvailableReports">View Reports Available To You</a></p>
-<p> </p>-->
 
 <div id="buttons">
     <a id="small" href="/SecureWitness/search/">Search</a>
@@ -75,10 +69,12 @@ div#buttons a#small:hover {
 </div>
 
 {% if adminStat == 1 %}
-<form action = '/SecureWitness/adminPage/' method = 'POST'>
+<!--<form action = '/SecureWitness/adminPage/' method = 'POST'>
 	{% csrf_token %}
 	<input type = 'submit' value = 'Admin Homepage'>
-</form>
+</form>-->
+<p> </p>
+<div id="buttons"><a href="/SecureWitness/adminPage/">Admin Homepage</a></div>
 {% endif %}
 
 <div style="position: absolute">
