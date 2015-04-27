@@ -286,6 +286,20 @@ def uploaded_key(request):
     return HttpResponse(str(ky))
     #return HttpResponse("In progress...")
 
+@csrf_exempt
+def uploaded_file_decrypt(request, fn):
+    # get reports for user
+    
+    path2 = os.path.join(settings.STATIC_ROOT, 'staticfiles', fn)
+    dest = open(path2, 'r')
+    response = HttpResponse(dest, content_type='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=%s' % fn
+    # response['X-Sendfile'] = path2
+
+    
+    return response
+    #return HttpResponse("In progress...")
+
 def index(request):
     if 'u' in request.session:
         name = request.session['u']
@@ -458,8 +472,8 @@ def upload(request):
 
                 newName = f.name + "_enc"
 
-                #path2 = os.path.join(settings.STATIC_ROOT, 'staticfiles', newName)
-                path2 = os.path.join(settings.STATIC_ROOT, newName)
+                path2 = os.path.join(settings.STATIC_ROOT, 'staticfiles', newName)
+                #path2 = os.path.join(settings.STATIC_ROOT, newName)
                 path = os.path.join('staticfiles', newName)
                 myf = open(path2, "w+b")
                 #testing = []
@@ -467,6 +481,7 @@ def upload(request):
                     enc_data = public_key.encrypt(chunk, 32)
                     myf.write(enc_data[0])
                     #testing.append(enc_data[0])
+
                 f = path
             else:
                 pkey = ""
@@ -477,7 +492,7 @@ def upload(request):
                 fold = None
             rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = fold, key = pkey)
             rep.group = json.dumps(group_access)
-            rep.f = myf
+            #rep.f = myf
             rep.save()
             #get groups user is in
             group_list = []

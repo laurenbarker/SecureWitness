@@ -81,6 +81,7 @@ while check == False:
     if r.text != "Invalid file name.":
         check = True
         #print(r.content)
+        #print (r.text)
 
         key = RSA.importKey(r.text)
 
@@ -88,10 +89,12 @@ while check == False:
     else:
         print("File not found. Please enter a valid file name.")
 
-# gets file to decrpyt
-r = requests.get('http://127.0.0.1:5000/SecureWitness/staticfiles/' + file_enc)
+# gets file to decrpy
+#r = requests.get('http://127.0.0.1:5000/SecureWitness/staticfiles/' + file_enc)
+payload = {'file': file_enc}
+r = requests.get('http://127.0.0.1:5000/SecureWitness/uploaded_file_decrypt/'+ file_enc)
 enc_data = r.content
-#print(enc_data)
+print(enc_data)
 # decrypt 
 # print decrypted file contents
 decrypted = key.decrypt(enc_data)
