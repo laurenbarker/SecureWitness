@@ -484,7 +484,7 @@ def upload(request):
                 #path = os.path.join('staticfiles', newName)
                 myf = open(path2, "w+b")
                 #testing = []
-                for chunk in f.chunks():
+                for chunk in f.chunks(128):
                     enc_data = public_key.encrypt(chunk, 32)
                     myf.write(enc_data[0])
                     #testing.append(enc_data[0])
