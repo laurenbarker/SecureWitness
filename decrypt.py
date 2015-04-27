@@ -15,7 +15,7 @@ psswrd = input("Please enter your Secure Witness password: ")
 #print ('Your input was' + " " + psswrd)
 # if logged in properly then show files available
 payload = {'username': usrnm, 'password': psswrd}
-r = requests.post("http://127.0.0.1:5000/SecureWitness/login_decrypt/", data=payload)
+r = requests.post("http://infinite-plateau-9873.herokuapp.com/SecureWitness/login_decrypt/", data=payload)
 print(r.text)
 # if authentification failed then quit
 if r.text == "unsuccessful authentication" or r.text == 'Your account has been suspended by an administrator':
@@ -24,7 +24,7 @@ if r.text == "unsuccessful authentication" or r.text == 'Your account has been s
 
 # display reports that can be downloaded
 payload = {'username': usrnm, 'password': psswrd}
-r = requests.post("http://127.0.0.1:5000/SecureWitness/viewReports_decrypt/", data=payload)
+r = requests.post("http://infinite-plateau-9873.herokuapp.com/SecureWitness/viewReports_decrypt/", data=payload)
 print("Reports you have access to:")
 print(r.text)
 if r.text == "unsuccessful authentication":
@@ -36,7 +36,7 @@ while check == False:
     # display files that can be downloaded in specified report
     rpt = input("Please enter the report number you would like to view: ")
     payload = {'username': usrnm, 'password': psswrd, 'report': rpt}
-    r = requests.post("http://127.0.0.1:5000/SecureWitness/viewFiles_decrypt/", data=payload)
+    r = requests.post("http://infinite-plateau-9873.herokuapp.com/SecureWitness/viewFiles_decrypt/", data=payload)
 
     #print (r.text)
     #sys.exit(0)
@@ -72,7 +72,7 @@ while check == False:
 
     # check if user has access via django server and get key to decrypt
     payload = {'username': usrnm, 'password': psswrd, 'report': rpt, 'file': file_enc}
-    r = requests.post('http://127.0.0.1:5000/SecureWitness/uploaded_key/', data=payload)
+    r = requests.post('http://infinite-plateau-9873.herokuapp.com/SecureWitness/uploaded_key/', data=payload)
     #print r.text
 
     if r.text == "unsuccessful authentication" or r.text == 'Your account has been suspended by an administrator':
@@ -92,7 +92,7 @@ while check == False:
 # gets file to decrpy
 #r = requests.get('http://127.0.0.1:5000/SecureWitness/staticfiles/' + file_enc)
 payload = {'file': file_enc}
-r = requests.get('http://127.0.0.1:5000/SecureWitness/uploaded_file_decrypt/'+ file_enc)
+r = requests.get('https://infinite-plateau-9873.herokuapp.com/SecureWitness/uploaded_file_decrypt/'+ file_enc)
 enc_data = r.content
 print(enc_data)
 # decrypt 

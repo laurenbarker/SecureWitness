@@ -290,7 +290,7 @@ def uploaded_key(request):
 def uploaded_file_decrypt(request, fn):
     # get reports for user
     
-    path2 = os.path.join(settings.STATIC_ROOT, 'staticfiles', fn)
+    path2 = os.path.join(settings.STATIC_ROOT, fn)
     dest = open(path2, 'r')
     response = HttpResponse(dest, content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s' % fn
