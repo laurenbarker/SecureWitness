@@ -26,7 +26,9 @@ if r.text == "unsuccessful authentication" or r.text == 'Your account has been s
 payload = {'username': usrnm, 'password': psswrd}
 r = requests.post("http://infinite-plateau-9873.herokuapp.com/SecureWitness/viewReports_decrypt/", data=payload)
 print("Reports you have access to:")
-print(r.text)
+reports = r.text.split(',')
+for report in reports:
+    print(report)
 if r.text == "unsuccessful authentication":
     print("Exiting application...")
     sys.exit(0)
@@ -95,10 +97,6 @@ while check == False:
 #r = requests.get('http://127.0.0.1:5000/SecureWitness/staticfiles/' + file_enc)
 r = requests.get('https://infinite-plateau-9873.herokuapp.com/SecureWitness/uploaded_file_decrypt/'+ file_enc + '/')
 enc_data = r.content
-#print(enc_data)
-# decrypt 
-# print decrypted file contents
-decrypted = key.decrypt(enc_data)
 #print(decrypted)
 
 # write back descrypted to file
@@ -106,7 +104,13 @@ downloads_dir = expanduser("~/Downloads/") + file_enc
 
 newFile = open(downloads_dir, 'w+b')
 #print(decrypted.decode(encoding='utf-8'))
-newFile.write(decrypted)
+
+for x in range(0,len(enc_data),128):
+    upper = x+128
+    if x+128 >= len(enc_data):
+        upper = len(enc_data)
+    decrypted = key.decrypt(enc_data[x:upper])
+    newFile.write(decrypted)
 newFile.close()
 
 print("File downloaded to '" + downloads_dir + "'")

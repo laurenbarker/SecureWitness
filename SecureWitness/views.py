@@ -160,7 +160,7 @@ def viewReports_decrypt(request):
         grp = grp + str(g)
 
     #ob_list = report.objects.filter(reduce(lambda x, y: x | y, [Q(name__contains=word) for word in group_list]))
-    return HttpResponse(str(report_list) + '\n')
+    return HttpResponse(str(list((report_list))) + '\n')
     #return HttpResponse(groups)
 
 @csrf_exempt
@@ -291,7 +291,7 @@ def uploaded_file_decrypt(request, fn):
     # get reports for user
     
     path2 = os.path.join(settings.STATIC_ROOT, fn)
-    dest = open(path2, 'r')
+    dest = open(path2, 'rb')
     response = HttpResponse(dest, content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s' % fn
     # response['X-Sendfile'] = path2
@@ -483,12 +483,15 @@ def upload(request):
                 #path2 = os.path.join(settings.STATIC_ROOT, newName)
                 #path = os.path.join('staticfiles', newName)
                 myf = open(path2, "w+b")
-                #testing = []
-                for chunk in f.chunks():
-                    enc_data = public_key.encrypt(chunk, 32)
+                testing = 0
+                #for chunk in f.chunks():
+                    #enc_data = public_key.encrypt(chunk, 32)
+                    #myf.write(enc_data[0])
+                    #testing+=1
+                size = f.size
+                for x in range(0,size,128):
+                    enc_data = public_key.encrypt(f.read(128), 32)
                     myf.write(enc_data[0])
-                    #testing.append(enc_data[0])
-
                 f = path2
             else:
                 pkey = ""
@@ -506,7 +509,7 @@ def upload(request):
                 if request.session['u'] in users[g.groupName]:
                     group_list.append(g.groupName)
             form = UploadFileForm(group_list)
-            return render(request,'SecureWitness/upload.html', {'form': form, 'msg': "Report was added successfully."})
+            return render(request,'SecureWitness/upload.html', {'form': form, 'msg': "Report was submitted successfully"})
         else:
             return render(request,'SecureWitness/upload.html', {'form': form, 'msg':'Short description and long description are required.'})
     elif 'u' in request.session:

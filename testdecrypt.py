@@ -98,7 +98,9 @@ enc_data = r.content
 #print(enc_data)
 # decrypt 
 # print decrypted file contents
-decrypted = key.decrypt(enc_data)
+
+
+#decrypted = key.decrypt(enc_data)
 #print(decrypted)
 
 # write back descrypted to file
@@ -106,7 +108,15 @@ downloads_dir = expanduser("~/Downloads/") + file_enc
 
 newFile = open(downloads_dir, 'w+b')
 #print(decrypted.decode(encoding='utf-8'))
-newFile.write(decrypted)
+
+for x in range(0,len(enc_data),128):
+    upper = x+127
+    if x+127 >= len(enc_data):
+        upper = len(enc_data)-1
+    decrypted = key.decrypt(enc_data[x:upper])
+    newFile.write(decrypted)
+    print("decrypting" + str(x))
+#newFile.write(decrypted)
 newFile.close()
 
 print("File downloaded to '" + downloads_dir + "'")
