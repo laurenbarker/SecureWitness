@@ -20,7 +20,7 @@
               {% else %}
                 <td>No File</td>
               {% endif %}
-              <form method="POST" action = '/SecureWitness/deleteReport/{{report.shortdesc}}'>
+              <form method="POST" action = '/SecureWitness/deleteReport/{{report.id}}'>
               {% csrf_token %}
               <td><input type="submit" value = "Delete" name="del"></td>
               </form>

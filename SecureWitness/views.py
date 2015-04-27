@@ -195,7 +195,7 @@ def viewFiles_decrypt(request):
         group_report_list = report.objects.filter(id__in=report_names)
 
         report_list = report_list | group_report_list
-  
+    #return HttpResponse('this works')
     rp = ""
     frp = ""
     for r in report_list:
@@ -210,8 +210,9 @@ def viewFiles_decrypt(request):
 
     #for reports in report_list:
         #if str(reports) == str(frp):
+
     if r.file:
-        r.file.name = r.file.name.split('uploaded_files')[1][1:]
+        r.file.name = r.file.name.split('staticfiles')[1][1:]
     frp = r.file.name
     shrt = r.shortdesc
     lng = r.longdesc
@@ -274,7 +275,7 @@ def uploaded_key(request):
 
     for reports in report_list:
         if str(reports) == str(frp):
-            reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
+            reports.file.name = reports.file.name.split('staticfiles')[1][1:]
             frp = reports.file.name
             if str(frp) != fn:
                 return HttpResponse("Invalid file name.")
@@ -283,6 +284,20 @@ def uploaded_key(request):
 
     
     return HttpResponse(str(ky))
+    #return HttpResponse("In progress...")
+
+@csrf_exempt
+def uploaded_file_decrypt(request, fn):
+    # get reports for user
+    
+    path2 = os.path.join(settings.STATIC_ROOT, fn)
+    dest = open(path2, 'r')
+    response = HttpResponse(dest, content_type='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=%s' % fn
+    # response['X-Sendfile'] = path2
+
+    
+    return response
     #return HttpResponse("In progress...")
 
 def index(request):
@@ -307,7 +322,7 @@ def index(request):
 
         for reports in report_list:
             if reports.file:
-                reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
+                reports.file.name = reports.file.name.split('staticfiles')[1][1:]
         return render(request, 'SecureWitness/index.html', {
             'report_list': report_list,
             'user' : request.session['u'],
@@ -397,7 +412,7 @@ def search(request):
 
             for reports in desclist:
                 if reports.file:
-                    reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
+                    reports.file.name = reports.file.name.split('staticfiles')[1][1:]
             template = loader.get_template('SecureWitness/index.html')
             context = RequestContext(request, {
                   'report_list': desclist,
@@ -417,6 +432,11 @@ def upload(request):
     if request.method == 'POST':
         form = UploadFileForm([],request.POST, request.FILES)
         if request.POST.get('shortdesc') and request.POST.get('longdesc'):
+            name = request.session['u']
+            u = user.objects.filter(username=name)[0]
+            fold = request.POST.get('folder')
+            if not fold:
+                fold = None
             short = request.POST.get('shortdesc')
             long = request.POST.get('longdesc')
             loc = request.POST.get('location')
@@ -444,6 +464,8 @@ def upload(request):
                     if permission:
                         group_access[g.groupName] = True
 
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, folder = fold)
+            rep.save()
             f = request.FILES.get('file')
             if f:
                 # public/private key pair
@@ -455,27 +477,26 @@ def upload(request):
                 public_key = key.publickey()
                 # change
 
-                newName = f.name + "_enc"
+                newName = f.name + "_enc" + str(rep.id)
 
-                path2 = os.path.join(settings.MEDIA_ROOT, 'uploaded_files', newName)
-                path = os.path.join('uploaded_files', newName)
+                path2 = os.path.join(settings.STATIC_ROOT, newName)
+                #path2 = os.path.join(settings.STATIC_ROOT, newName)
+                #path = os.path.join('staticfiles', newName)
                 myf = open(path2, "w+b")
-                testing = []
+                #testing = []
                 for chunk in f.chunks():
                     enc_data = public_key.encrypt(chunk, 32)
                     myf.write(enc_data[0])
-                    testing.append(enc_data[0])
-                f = path
+                    #testing.append(enc_data[0])
+
+                f = path2
             else:
                 pkey = ""
-            name = request.session['u']
-            u = user.objects.filter(username=name)[0]
-            fold = request.POST.get('folder')
-            if not fold:
-                fold = None
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = fold, key = pkey)
+            rep.key = pkey
+            rep.file = f
+            #rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = fold, key = pkey)
             rep.group = json.dumps(group_access)
-
+            #rep.f = myf
             rep.save()
             #get groups user is in
             group_list = []
@@ -485,7 +506,7 @@ def upload(request):
                 if request.session['u'] in users[g.groupName]:
                     group_list.append(g.groupName)
             form = UploadFileForm(group_list)
-            return render(request,'SecureWitness/upload.html', {'form': form, 'msg':testing})
+            return render(request,'SecureWitness/upload.html', {'form': form, 'msg': "Report was added successfully."})
         else:
             return render(request,'SecureWitness/upload.html', {'form': form, 'msg':'Short description and long description are required.'})
     elif 'u' in request.session:
@@ -522,7 +543,7 @@ def viewFolder(request, folder=""):
 
         for reports in report_list:
             if reports.file:
-                reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
+                reports.file.name = reports.file.name.split('staticfiles')[1][1:]
         context = RequestContext(request, {
                 'report_list': report_list,
                 'user' : request.session['u'],
@@ -536,6 +557,16 @@ def viewReport(request, number=""):
     if 'u' in request.session:
         if request.method == 'POST':
             if request.POST.get('del'):
+
+                #Delete file from directory
+                report_file = report.objects.filter(id=number)
+                for r in report_file:
+                    if r.file:
+                        try: 
+                            os.remove(r.file.name)                            
+                        except:
+                            msg = 'No file was found'
+
                 report_list = report.objects.filter(id=number).delete()
                 template = loader.get_template('SecureWitness/viewReport.html')
                 context = RequestContext(request, {
@@ -600,7 +631,7 @@ def viewReport(request, number=""):
                     report_list.group = json.dumps({})
                 report_list.save()
                 if report_list.file:
-                    report_list.file.name = report_list.file.name.split('uploaded_files')[1][1:]
+                    report_list.file.name = report_list.file.name.split('staticfiles')[1][1:]
                 return HttpResponseRedirect(number)
         else:
             name = request.session['u']
@@ -625,7 +656,7 @@ def viewReport(request, number=""):
                     group_dict[g] = False
 
             if report_list.file:
-                report_list.file.name = report_list.file.name.split('uploaded_files')[1][1:]
+                report_list.file.name = report_list.file.name.split('staticfiles')[1][1:]
 
             context = RequestContext(request, {
                     'report': report_list,
@@ -665,7 +696,7 @@ def viewAvailableReports(request):
 
         for reports in report_list:
             if reports.file:
-                reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
+                reports.file.name = reports.file.name.split('staticfiles')[1][1:]
 
         return render(request, 'SecureWitness/availableReports.html', {
             'report_list': report_list,
@@ -920,15 +951,21 @@ def changeUserSuspensionStatus(request):
     else:
             return render(request, 'SecureWitness/login.html', {'form' : loginForm()})
 
-def deleteReport(request, desc=''):
+def deleteReport(request, number=''):
     if 'u' in request.session:
         if request.method == 'POST':
-
             if request.POST.get('del'):
-                report_list = report.objects.filter(shortdesc=desc).delete()
-                template = loader.get_template('SecureWitness/deleteReport.html')
 
-                #Delete from directory
+                report_file = report.objects.filter(id=number)
+                for r in report_file:
+                    if r.file:
+                        try: 
+                            os.remove(r.file.name)                            
+                        except:
+                            msg = 'No file was found'
+
+                report_list = report.objects.filter(id=number).delete()
+                template = loader.get_template('SecureWitness/deleteReport.html')
 
             form = deleteReportForm(request.POST)
             report_list = report.objects.all()
