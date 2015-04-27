@@ -89,12 +89,13 @@ while check == False:
     else:
         print("File not found. Please enter a valid file name.")
 
+#print('https://infinite-plateau-9873.herokuapp.com/SecureWitness/uploaded_file_decrypt/'+ file_enc)
+
 # gets file to decrpy
 #r = requests.get('http://127.0.0.1:5000/SecureWitness/staticfiles/' + file_enc)
-payload = {'file': file_enc}
 r = requests.get('https://infinite-plateau-9873.herokuapp.com/SecureWitness/uploaded_file_decrypt/'+ file_enc)
 enc_data = r.content
-print(enc_data)
+#print(enc_data)
 # decrypt 
 # print decrypted file contents
 decrypted = key.decrypt(enc_data)
