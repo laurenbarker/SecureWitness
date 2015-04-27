@@ -3,10 +3,32 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Secure Witness</title>
+
+<style type="text/css">
+div#lg {
+    position: absolute;
+    top: 20px;
+    right: 50px;
+}
+div#lg a:link {
+    margin: 0;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: medium;
+}
+</style>
 </head>
 <body>
 
-<h2>List of Reports</h2>
+<div style="position: absolute">
+    <a href="/SecureWitness/homepage"><img style="position: fixed; top: 10px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
+</div>
+<div id="lg">
+    <a href="/SecureWitness/logout">Logout</a>
+</div>
+
+
+<h2 style="padding-top: 5px;">List of Reports</h2>
 {% if not search %}
 <b>List of reports submitted by {{ user }}</b>
 {% else %}
@@ -73,13 +95,6 @@
     <p>{{user}} is not in any groups</p>
     {% endif %}
 {% endif %}
-
-<div style="position: absolute">
-    <a href="/SecureWitness/homepage"><img style="position: fixed; top: 5px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
-</div>
-<div style="position: absolute; top: 10px; right: 50px;">
-    <a href="/SecureWitness/logout">Logout</a>
-</div>
 
 </body>
 </html>

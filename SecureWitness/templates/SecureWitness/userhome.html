@@ -3,6 +3,51 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>SecureWitness</title>
+<style type="text/css">
+div#lg {
+    position: absolute;
+    top: 20px;
+    right: 50px;
+}
+div#lg a:link {
+    margin: 0;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: medium;
+}
+div#buttons {
+    padding-top: 15px;
+    text-align: center;
+}
+div#buttons a{
+    margin: 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    padding: 5px 10px 5px 10px;
+    font-size: 18px;
+    display: inline-block;
+    color: black;
+    border: 2px black solid;
+}
+div#buttons a#small {
+    margin: 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    padding: 5px 30px 5px 30px;
+    font-size: 18px;
+    display: inline-block;
+    color: black;
+    border: 2px black solid;
+}
+div#buttons a:hover {
+    background-color: lightgray;
+    border: 2px lightgray solid;
+}
+div#buttons a#small:hover {
+    background-color: lightgray;
+    border: 2px lightgray solid;
+}
+</style>
 </head>
 <body>
   <script type="text/javascript">
@@ -14,13 +59,20 @@
 
 <b>Welcome {{ user }}</b><br/>
 <p> </p>
-<p><a href="/SecureWitness/search/">Search</a></p>
+<!--<p><a href="/SecureWitness/search/">Search</a></p>
 <p><a href="/SecureWitness/upload/">Upload</a></p>
 <p><a href="/SecureWitness/index">Index</a></p>
 <p><a href="/SecureWitness/addToGroupUser">Add Other Users To Your Groups</a></p>
 <p><a href="/SecureWitness/viewAvailableReports">View Reports Available To You</a></p>
+<p> </p>-->
 
-<p> </p>
+<div id="buttons">
+    <a id="small" href="/SecureWitness/search/">Search</a>
+    <a id="small" href="/SecureWitness/upload/">Upload</a>
+    <a id="small" href="/SecureWitness/index">Index</a>
+    <a href="/SecureWitness/addToGroupUser">Add Other Users To Your Groups</a>
+    <a href="/SecureWitness/viewAvailableReports">View Reports Available To You</a>
+</div>
 
 {% if adminStat == 1 %}
 <form action = '/SecureWitness/adminPage/' method = 'POST'>
@@ -39,7 +91,7 @@
     </p>
 </div>
 
-<div style="position: absolute; top: 10px; right: 50px;">
+<div id="lg">
     <a href="/SecureWitness/logout">Logout</a>
 </div>
 
