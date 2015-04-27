@@ -290,7 +290,7 @@ def uploaded_key(request):
 def uploaded_file_decrypt(request, fn):
     # get reports for user
     
-    path2 = os.path.join(settings.STATIC_ROOT, fn)
+    path2 = os.path.join(settings.STATIC_ROfOT, fn)
     dest = open(path2, 'r')
     response = HttpResponse(dest, content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s' % fn
@@ -412,7 +412,7 @@ def search(request):
 
             for reports in desclist:
                 if reports.file:
-                    reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
+                    reports.file.name = reports.file.name.split('staticfiles')[1][1:]
             template = loader.get_template('SecureWitness/index.html')
             context = RequestContext(request, {
                   'report_list': desclist,
@@ -432,6 +432,11 @@ def upload(request):
     if request.method == 'POST':
         form = UploadFileForm([],request.POST, request.FILES)
         if request.POST.get('shortdesc') and request.POST.get('longdesc'):
+            name = request.session['u']
+            u = user.objects.filter(username=name)[0]
+            fold = request.POST.get('folder')
+            if not fold:
+                fold = None
             short = request.POST.get('shortdesc')
             long = request.POST.get('longdesc')
             loc = request.POST.get('location')
@@ -459,6 +464,8 @@ def upload(request):
                     if permission:
                         group_access[g.groupName] = True
 
+            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, folder = fold)
+            rep.save()
             f = request.FILES.get('file')
             if f:
                 # public/private key pair
@@ -470,7 +477,7 @@ def upload(request):
                 public_key = key.publickey()
                 # change
 
-                newName = f.name + "_enc"
+                newName = f.name + "_enc" + str(rep.id)
 
                 path2 = os.path.join(settings.STATIC_ROOT, newName)
                 #path2 = os.path.join(settings.STATIC_ROOT, newName)
@@ -485,12 +492,9 @@ def upload(request):
                 f = path2
             else:
                 pkey = ""
-            name = request.session['u']
-            u = user.objects.filter(username=name)[0]
-            fold = request.POST.get('folder')
-            if not fold:
-                fold = None
-            rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = fold, key = pkey)
+            rep.key = pkey
+            rep.file = f
+            #rep = report(author = u, shortdesc = short, longdesc = long, location = loc, incident_date = date, keywords = kwds, private = priv, file = f, folder = fold, key = pkey)
             rep.group = json.dumps(group_access)
             #rep.f = myf
             rep.save()
@@ -539,7 +543,7 @@ def viewFolder(request, folder=""):
 
         for reports in report_list:
             if reports.file:
-                reports.file.name = reports.file.name.split('uploaded_files')[1][1:]
+                reports.file.name = reports.file.name.split('staticfiles')[1][1:]
         context = RequestContext(request, {
                 'report_list': report_list,
                 'user' : request.session['u'],
@@ -692,7 +696,7 @@ def viewAvailableReports(request):
 
         for reports in report_list:
             if reports.file:
-                reports.file.name = reports.file.name.split("/")[1]
+                reports.file.name = reports.file.name.split('staticfiles')[1][1:]
 
         return render(request, 'SecureWitness/availableReports.html', {
             'report_list': report_list,
