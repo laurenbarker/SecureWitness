@@ -472,9 +472,9 @@ def upload(request):
 
                 newName = f.name + "_enc"
 
-                path2 = os.path.join(settings.STATIC_ROOT, 'staticfiles', newName)
+                path2 = os.path.join(settings.STATIC_ROOT, newName)
                 #path2 = os.path.join(settings.STATIC_ROOT, newName)
-                path = os.path.join('staticfiles', newName)
+                #path = os.path.join('staticfiles', newName)
                 myf = open(path2, "w+b")
                 #testing = []
                 for chunk in f.chunks():
@@ -482,7 +482,7 @@ def upload(request):
                     myf.write(enc_data[0])
                     #testing.append(enc_data[0])
 
-                f = path
+                f = path2
             else:
                 pkey = ""
             name = request.session['u']
