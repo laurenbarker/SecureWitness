@@ -70,3 +70,6 @@ migrations
 
 # staticfiles according to heroku
 staticfiles
+
+myenv
+staticfiles
