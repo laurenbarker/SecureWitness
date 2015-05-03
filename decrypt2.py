@@ -9,9 +9,9 @@ import getpass
 from os.path import expanduser
 
 # enter username
-usrnm = input("Please enter your Secure Witness username: ")
+usrnm = raw_input("Please enter your Secure Witness username: ")
 # enter password
-psswrd = input("Please enter your Secure Witness password: ")
+psswrd = raw_input("Please enter your Secure Witness password: ")
 #print ('Your input was' + " " + psswrd)
 # if logged in properly then show files available
 payload = {'username': usrnm, 'password': psswrd}
@@ -26,9 +26,7 @@ if r.text == "unsuccessful authentication" or r.text == 'Your account has been s
 payload = {'username': usrnm, 'password': psswrd}
 r = requests.post("http://infinite-plateau-9873.herokuapp.com/SecureWitness/viewReports_decrypt/", data=payload)
 print("Reports you have access to:")
-reports = r.text.split(',')
-for report in reports:
-    print(report)
+print(r.text)
 if r.text == "unsuccessful authentication":
     print("Exiting application...")
     sys.exit(0)
@@ -36,7 +34,7 @@ if r.text == "unsuccessful authentication":
 check = False
 while check == False:
     # display files that can be downloaded in specified report
-    rpt = input("Please enter the report number you would like to view: ")
+    rpt = raw_input("Please enter the report number you would like to view: ")
     payload = {'username': usrnm, 'password': psswrd, 'report': rpt}
     r = requests.post("http://infinite-plateau-9873.herokuapp.com/SecureWitness/viewFiles_decrypt/", data=payload)
 
@@ -68,7 +66,7 @@ while check == False:
 check = False
 while check == False:
     # user enters file to decrypt
-    file_enc = input("Please enter the file you wish to decrypt: ")
+    file_enc = raw_input("Please enter the file you wish to decrypt: ")
     #print ('Your input was' + " " + file_enc)
     print("")
 
@@ -95,23 +93,38 @@ while check == False:
 
 # gets file to decrpy
 #r = requests.get('http://127.0.0.1:5000/SecureWitness/staticfiles/' + file_enc)
-r = requests.get('https://infinite-plateau-9873.herokuapp.com/SecureWitness/uploaded_file_decrypt/'+ file_enc + '/')
+r = requests.get('http://infinite-plateau-9873.herokuapp.com/SecureWitness/uploaded_file_decrypt/'+ file_enc + '/')
 enc_data = r.content
+
+to_join = []
+step = 0
+s = enc_data[0]
+print (key.decrypt(s))
+
+#while 1:
+    # Read 128 characters at a time.
+#    s = enc_data[step*128:(step+1)*128]
+    #key.decrypt(s)
+#    if not s: break
+    # Encrypt with RSA and append the result to list.
+    # RSA encryption returns a tuple containing 1 string, so i fetch the string.
+#    print key.decrypt(s)
+#    to_join.append(key.decrypt(s)[0])
+ #   step += 1
+
+#print(to_join)
+# decrypt 
+# print decrypted file contents
+#decrypted = key.decrypt(enc_data)
 #print(decrypted)
 
 # write back descrypted to file
 downloads_dir = expanduser("~/Downloads/") + file_enc
 
-newFile = open(downloads_dir, 'w+b')
+#newFile = open(downloads_dir, 'w+b')
 #print(decrypted.decode(encoding='utf-8'))
-
-for x in range(0,len(enc_data),128):
-    upper = x+128
-    if x+128 >= len(enc_data):
-        upper = len(enc_data)
-    decrypted = key.decrypt(enc_data[x:upper])
-    newFile.write(decrypted)
-newFile.close()
+#newFile.write(decrypted)
+#newFile.close()
 
 print("File downloaded to '" + downloads_dir + "'")
 

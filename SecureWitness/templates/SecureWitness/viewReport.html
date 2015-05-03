@@ -15,6 +15,19 @@
         $('.vDateField').datepicker();
     });
 </script>
+<style type="text/css">
+div#lg {
+    position: absolute;
+    top: 20px;
+    right: 50px;
+}
+div#lg a:link {
+    margin: 0;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: medium;
+}
+</style>
 </head>
 <body>
 {% if report %}
@@ -68,8 +81,14 @@
 {% else %}
 The report has been deleted. Select an option to return to another page.<br/>
 {% endif %}
-<a href="/SecureWitness/search/">Search</a>
+<div style="position: absolute">
+    <a href="/SecureWitness/homepage"><img style="position: fixed; top: 10px; right: 5px;"; src="http://i.stack.imgur.com/m4bqm.png"></a>
+</div>
+<div id="lg">
+    <a href="/SecureWitness/logout">Logout</a>
+</div>
+<!--<a href="/SecureWitness/search/">Search</a>
 <a href="/SecureWitness/upload/">Upload</a>
-<a href="/SecureWitness/index">Index</a>
+<a href="/SecureWitness/index">Index</a>-->
 </body>
 </html>
